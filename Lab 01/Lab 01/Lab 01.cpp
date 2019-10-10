@@ -1,3 +1,12 @@
+/**
+ * @author Katona Aron
+ * @group 30423
+ *
+ * Problem specification:	Implement correctly and efficiently 3 direct sorting methods (Bubble Sort,
+ *							Insertion Sort – using either linear or binary insertion and Selection Sort)
+ *
+ */
+
 #include <iostream>
 #include <vector>
 #include <climits>
@@ -8,27 +17,35 @@ using namespace std;
 
 #define MIN_SIZE 100
 #define MAX_SIZE 10000
-#define STEPS 500//100
+#define STEPS 100
 #define NR_OF_MEASUREMENTS_AVERAGE_CASE 5
 #define RANGE_MIN 10
 #define RANGE_MAX 50000
 
-//#define DEBUG
+#define DEBUG
 
 typedef void (*SortingAlgortithm)(int A[], size_t Size, Operation Ass, Operation Comp);
 
-void PrintArray(int A[], size_t Size)
+void PrintArray(int A[], size_t Size, int i = -1, int j = -1)
 {
 	for (unsigned i = 0; i < Size; i++)
 	{
 		cout << A[i] << " ";
+	}
+	if (i >= 0)
+	{
+		cout << "\t(i = " << i;
+		if (j >= 0)
+			cout << ", j = " << j << ")";
+		else
+			cout << ")";
 	}
 	cout << "\n";
 }
 
 void TestSortingAlgorithm(SortingAlgortithm Sort)
 {
-	const int size = 10;
+	const int size = 5;
 	const int range_min = 1;
 	const int range_max = 10;
 	const enum { RANDOM = 0, ASC, DESC } order = RANDOM;
@@ -42,15 +59,14 @@ void TestSortingAlgorithm(SortingAlgortithm Sort)
 
 	FillRandomArray(data, size, range_min, range_max, unique, order);
 	copy(begin(data), end(data), begin(dataCopy));
-	cout << "dataCopy: ";
-	PrintArray(dataCopy, size);
+	
+	cout << "I: ";
 	PrintArray(data, size);
-
+	
 	Sort(data, size, ass, comp);
-	PrintArray(data, size);
 
 	sort(dataCopy, dataCopy + size);
-	cout << "dataCopy: ";
+	cout << "R: ";
 	PrintArray(dataCopy, size);
 	assert(memcmp(data, dataCopy, size * sizeof(int)) == 0);
 
@@ -71,25 +87,26 @@ void InsertionSort(int A[], size_t Size, Operation Ass, Operation Comp)
 			A[j + 1] = A[j];
 			Ass.count();
 			j--;
+#ifdef DEBUG
+			PrintArray(A, Size, i, j + 1);
+#endif // DEBUG
 		}
 		if (j >= 0)
 			Comp.count();
-		if (j != i - 1)
-		{
-			A[j + 1] = key;
-			Ass.count();
-		}
+
+		A[j + 1] = key;
+		Ass.count();
 
 #ifdef DEBUG
-		PrintArray(A, Size);
+		PrintArray(A, Size, i);
 #endif // DEBUG
-		}
 	}
+}
 
 void SelectionSort(int A[], size_t Size, Operation Ass, Operation Comp)
 {
 	int min_index, j;
-	for (int i = 0; i < Size; i++)
+	for (int i = 0; i < Size - 1; i++)
 	{
 		min_index = i;
 		for (j = i + 1; j < Size; j++)
@@ -107,10 +124,10 @@ void SelectionSort(int A[], size_t Size, Operation Ass, Operation Comp)
 		}
 
 #ifdef DEBUG
-		PrintArray(A, Size);
+		PrintArray(A, Size, i);
 #endif // DEBUG
-		}
 	}
+}
 
 void BubbleSort(int A[], size_t Size, Operation Ass, Operation Comp)
 {
@@ -126,16 +143,19 @@ void BubbleSort(int A[], size_t Size, Operation Ass, Operation Comp)
 				swap(A[j], A[j - 1]);
 				Ass.count(3);
 				swapped = true;
+#ifdef DEBUG
+				PrintArray(A, Size, i, j);
+#endif // DEBUG
 			}
 		}
 #ifdef DEBUG
-		PrintArray(A, Size);
+		PrintArray(A, Size, i);
 #endif // DEBUG
 
 		if (!swapped)
 			return;
-			}
-		}
+	}
+}
 
 void EvaluateSortingAlgorithms()
 {
@@ -254,10 +274,10 @@ void EvaluateSortingAlgorithms()
 
 int main()
 {
-	//TestSortingAlgorithm(InsertionSort);
-	//TestSortingAlgorithm(SelectionSort);
-	//TestSortingAlgorithm(BubbleSort);
-	EvaluateSortingAlgorithms();
+	TestSortingAlgorithm(InsertionSort);
+	TestSortingAlgorithm(SelectionSort);
+	TestSortingAlgorithm(BubbleSort);
+	//EvaluateSortingAlgorithms();
 
 	return 0;
 }
