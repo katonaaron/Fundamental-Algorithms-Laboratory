@@ -60,6 +60,27 @@
  *                  complexity on worst case.
  *      Average case: The array is not sorted: There are so many comparisions and assignments in each iteration, that it results in O(n^2) comparisions, assignments and total
  *                    complexity on average case.
+ * Stability:
+ *  1. Insertion sort:
+ *      The implementation is stable because in the comparision the "<" operator was used instead of "<=", meaning that if two elements with the same key are compared, they will not
+ *      be swapped, they will be placed next to each other, preserving the relative order of equal elements from the input in the output.
+ *  2. Selection sort:
+ *      This implementation is not stable because swapping non adjacent elements could change the relative order of some equal elements in S.
+ *  3. Bubble sort:
+ *      The implementation is stable because in the comparision the "<" operator was used instead of "<=", meaning that if two elements with the same key are compared, they will not
+ *      be swapped, the element with the smallest index will be compared to the other elements from that point forward, preserving the relative order of equal elements from the 
+ *      input in the output.
+ *
+ * Comparision:
+ *      1. All of the three sorting methods are comparision based, in place sorting algorithms with O(1) auxiliary space complexity. None of them are optimal, because the worst case
+ *      complexity is O(n^2) != Omega(nlogn). 
+ *      2. In the best case Insertion s. and Bubble s. have better comparision complexity then Selection s., O(n) instead of O(n^2). In the worst case the comparisions are O(n^2).
+ *      Although in the average case the comparisions are O(n^2), from the chart we can deduce that Insertion s. does fewer comparisions than the others, in this implementation it 
+ *      has half as much.
+ *      3. In the best case Insertion s. has O(n), the others have 0 = O(1) assignments. But in the average and worst case, Selection s. has O(n), the others have O(n^2) assignments. 
+ *      It can be deduced from the charts that Bubble sort does much more assignments than Insertion sort in the worst and average case.
+ *      4. The total complexity of Selection s. in the best case is O(N^2) while the others are O(n). In the other cases all the algorithms are O(n^2), but from the chart we can deduce 
+ *      that Bubblesort uses more operations than the others.
  */
 
 #include <iostream>
