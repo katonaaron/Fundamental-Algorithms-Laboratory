@@ -3,8 +3,7 @@
  * @group 30423
  *
  * Problem specification:
- *		Implement correctly and efficiently 3 direct sorting methods (Bubble Sort,
- *		Insertion Sort - using either linear or binary insertion and Selection Sort)
+ *		Implement correctly and efficiently 3 direct sorting methods (Bubble Sort, Insertion Sort - using either linear or binary insertion and Selection Sort)
  *
  * Correctness:
  *		In each algorithm the array A[0...n-1] is logically split into two sets: the Destination(D) set, in which the elements are in a sorted order,
@@ -40,7 +39,7 @@
  *          maintenance: In each iteration, the minimum element from S is taken and inserted at the end of D, at A[i]. This is accomplished by swapping all the adjacent elements 
  *                       A[j], A[j-1], for which A[j] < A[j -1], j starting each time from the end of the array (n-1), downto the first element of S, A[i]. After the last swap,  
  *                       A[0..i] will be in a sorted order, thus an element from S is inserted into D.
- *          termination: The algorithm terminates when i == n or when no swaps were executed, both means that A[0...n-1] contains the original elements in a sorted order.
+ *          termination: The algorithm terminates when i == n or when no swaps were executed, both means that A[0...n-1] = D contains the original elements in a sorted order.
  * Efficiency:
  *  1. Insertion sort:  
  *      Best case: The array is already sorted: Each element of the array is compared to its neighbour, thus it has O(n) comparisions, each time the key of A[i] is saved into
@@ -74,12 +73,12 @@
  * Comparision:
  *      1. All of the three sorting methods are comparision based, in place sorting algorithms with O(1) auxiliary space complexity. None of them are optimal, because the worst case
  *      complexity is O(n^2) != Omega(nlogn). 
- *      2. In the best case Insertion s. and Bubble s. have better comparision complexity then Selection s., O(n) instead of O(n^2). In the worst case the comparisions are O(n^2).
- *      Although in the average case the comparisions are O(n^2), from the chart we can deduce that Insertion s. does fewer comparisions than the others, in this implementation it 
+ *      2. In the best case Insertion sort and Bubble sort have better comparision complexity then Selection sort, O(n) instead of O(n^2). In the worst case the comparisions are O(n^2).
+ *      Although in the average case the comparisions are O(n^2), from the chart we can deduce that Insertion sort does fewer comparisions than the others, in this implementation it 
  *      has half as much.
- *      3. In the best case Insertion s. has O(n), the others have 0 = O(1) assignments. But in the average and worst case, Selection s. has O(n), the others have O(n^2) assignments. 
+ *      3. In the best case Insertion sort has O(n), the others have 0 = O(1) assignments. But in the average and worst case, Selection sort has O(n), the others have O(n^2) assignments. 
  *      It can be deduced from the charts that Bubble sort does much more assignments than Insertion sort in the worst and average case.
- *      4. The total complexity of Selection s. in the best case is O(N^2) while the others are O(n). In the other cases all the algorithms are O(n^2), but from the chart we can deduce 
+ *      4. The total complexity of Selection sort in the best case is O(N^2) while the others are O(n). In the other cases all the algorithms are O(n^2), but from the chart we can deduce 
  *      that Bubblesort uses more operations than the others.
  */
 
