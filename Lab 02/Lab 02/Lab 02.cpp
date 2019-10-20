@@ -62,8 +62,7 @@
  *      In the other hand, the size of the heap is variable in the top-down method. One can any time insert new elements to the heap in O(log n), get the maximum element in O(1),
  *          and extract it in O(log n). At insertion the size of the heap increases, and at extraction the size of the heap decreases. These properties make the heap an efficient 
  *          priority queue implementation.
- *      In conclusion, the bottom-up heap build method should be used in heapsort, the top-down should be used as a priority queue.
- *              
+ *      In conclusion, the bottom-up heap build method should be used in heapsort, the top-down should be used to implement a priority queue.            
  */
 
 #include <iostream>
