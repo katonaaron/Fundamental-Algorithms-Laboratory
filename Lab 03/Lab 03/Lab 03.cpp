@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <ctime>
 #include "Profiler.h"
 
 using namespace std;
@@ -29,11 +30,20 @@ int Partition(int A[], int p, int r)
     return i + 1;
 }
 
+int RandomizedPartition(int A[], int p, int r)
+{
+    srand(time(0));
+    int i = rand() % (r - p + 1) + p;
+    swap(A[i], A[r]);
+    return Partition(A, p, r);
+}
+
 void QuickSort(int A[], int p, int r)
 {
     if (p < r)
     {
-        int q = Partition(A, p, r);
+        //int q = Partition(A, p, r);
+        int q = RandomizedPartition(A, p, r);
         PrintArray(A + p, r - p + 1, "Partitioned for p = " + to_string(p) + ", r = " + to_string(r) + ", q = " + to_string(q));
         QuickSort(A, p, q - 1);
         QuickSort(A, q + 1, r);
