@@ -1,3 +1,49 @@
+/**
+ * @author Katona Aron
+ * @group 30423
+ *
+ * Problem specification:
+ *		 Implement correctly and efficiently Quicksort and QuickSelect (RandomizedSelect). Analyze the complexity of Quicksort and Heapsort comparatively.
+ *
+ * Efficiency:
+ *  Denote n as the size of the array.
+ *
+ *  1. Heapsort:
+ *      Heapsort is implemented using the Bottom-Up heap building procedure, which has an O(n) complexity for any input, and it is only called once. The MaxHeapify procedure is 
+ *      worst case O(log n), and it is called n - 1 times. Thus the worst case complexity of the Heapsort is O(n) + (n - 1) * O(log n) == O(n) + O(n * log n) == O(n * log n).
+ *      Heapsort uses O(1) auxiliary space and its worst case complexity O(n * log n) == Omega(n * log n), thus heapsort is an optimal algorithm.
+ *  2. Quicksort:
+ *      Quicksort is a divide and conquer algorithm, that "divides" the problem using a partitioning algorithm, "conquers" with two recursive calls, and does not "combine". The
+ *      partitioning algorithm divides the problem into two sub-problems by choosing a pivot and placing the elements that are smaller or equal than the pivot on its left side,
+ *      and the other elements on its right side. It is implemented in two ways: by choosing the last element as pivot or by choosing a random pivot. In both
+ *
+ *      2.1 Choosing the last element as pivot:
+ *          The worst case occurs when the array is partitioned into two partitions having n-1 and 0 sizes. This happens if the chosen pivot is the largest or the smallest element
+ *          in the array. In this case the running time is T(n) = T(n - 1) + T(0) + O(n) = T(n) + O(n) = O(n^2).
+ *          The best case is when the array is split such that each partition has no more that n/2 elements. This way the running time is T(n) = 2T(n/2) + O(n). By applying the 
+ *          master theorem we get that the average case complexity is O(n * log n).
+ *          In the average case, the running time is close to the best case, thus it is O(n * log n) on the average case.
+ *      2.2 Choosing a random pivot:
+ *          By choosing a random pivot the worst case running time is also O(n^2), but it has a so small probability, that the worst case expected running time is O(n log n), thus 
+ *          the worst case is avoided. Form the charts we can deduce that the average case performance is the same as in the previous implementation.
+ *
+ *      Quicksort uses O(log n) additional space by having the recursive calls. The first implementation has O(n^2) worst case complexity so it is not optimal. The second implementation
+ *      has O(n * log n) expected worst case running time with a very high probability, so it can be considered as an optimal algorithm. Another implementation of the Quicksort
+ *      algorithm is to use the median as the pivot. This way is the worst case is eliminated. Finding the median is O(n) thus this method is O(n * log n) in the worst case. Thus if 
+ *      logarithmic additional space is allowed, quicksort can be implemented to be an optimal sorting algorithm either by choosing a random pivot, or having the median as the pivot.
+ *
+        The quicksort can be improved additionally by applying a direct sorting method if the input data size is small. I compared the two quicksort implementations with insertion sort
+        and found that in the average for n < 18 the running time of insertion sort is smaller than the running time of both implementations.
+
+ * Stability:
+ *  Neither the Heapsort, nor these implementations of the Quicksort are stable. Examples: Heapsort: A = {4, 2, 2, 1, 3, 0}, QuickSort: A = {5, 5, 2}
+ *
+ * Comparison of Heapsort and Quicksort:
+ *  Heapsort and Quicksort are both comparison based in-place sorting algorithms, having O(n * log n) running time in the average case. But the multiplicative constant of the heapsort,
+    which is ignored by the O notation, is greater than the multiplicative constant of the Quicksort. Thus in the average Quicksort is faster. But advantage of heapsort is that it 
+    guarantees an O(n * log n) worst case running time, and it uses O(1) additional space. 
+ */
+
 #include <iostream>
 #include <string>
 #include <ctime>
@@ -17,7 +63,7 @@ const int NR_OF_MEASUREMENTS_AVERAGE_CASE = 5;
 const int RANGE_MIN = 10;
 const int RANGE_MAX = 50000;
 
-//#define DEMO
+#define DEMO
 
 void PrintArray(int A[], int Size, string Message = "")
 {
