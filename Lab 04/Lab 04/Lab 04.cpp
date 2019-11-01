@@ -5,6 +5,8 @@
 
 using namespace std;
 
+//#define DEMO
+
 enum SORTED_ORDER { RANDOM = 0, ASC, DESC };
 
 const int RANGE_MIN = 1;
@@ -13,7 +15,7 @@ const int RANGE_MAX = 20;
 template <class T>
 void PrintVector(vector<T> Vector, string Message = "")
 {
-    for (T num : Vector)
+    for (T& num : Vector)
     {
         cout << num << " ";
     }
@@ -22,7 +24,7 @@ void PrintVector(vector<T> Vector, string Message = "")
 
 void PrintList(list<int> List, string Message = "")
 {
-    for (int num : List)
+    for (int& num : List)
     {
         cout << num << " ";
     }
@@ -58,7 +60,7 @@ struct Element {
     }
     friend ostream& operator<< (ostream& output, const Element& E)
     {
-        output << "Element{key=" << E.key << ", list_index=" << E.list_index << "}";
+        output << "{key=" << E.key << ", list_index=" << E.list_index << "}";
         return output;
     }
 };
@@ -68,10 +70,12 @@ class Heap
 {
     vector<T> data;
     Compare compare = Compare();
+    //Profiler
+    Operation op;
 public:
 
-    Heap() {};
-    Heap(vector<T> Data);
+    Heap(Operation Op) : op(Op) {};
+    Heap(vector<T> Data, Operation Op);
 
     void Push(T Element);
     void Pop();
@@ -108,9 +112,10 @@ private:
 };
 
 template<class T, class Compare>
-Heap<T, Compare>::Heap(vector<T> Data)
+Heap<T, Compare>::Heap(vector<T> Data, Operation Op) : op(Op)
 {
     this->data = Data;
+    op.count(data.size());
     BuildHeap();
 }
 
@@ -118,6 +123,7 @@ template<class T, class Compare>
 void Heap<T, Compare>::Push(T Element)
 {
     data.push_back(Element);
+    op.count();
     SiftUp(data.size() - 1);
 }
 
@@ -125,6 +131,7 @@ template<class T, class Compare>
 void Heap<T, Compare>::Pop()
 {
     data.at(0) = data.at(data.size() - 1);
+    op.count(1);
     data.pop_back();
     Heapify(0);
 }
@@ -151,6 +158,7 @@ template<class T, class Compare>
 void Heap<T, Compare>::ReplaceTop(T Element)
 {
     data.at(0) = Element;
+    op.count(1);
     Heapify(0);
 }
 
@@ -179,15 +187,12 @@ void Heap<T, Compare>::Heapify(int i)
     {
         largest = right;
     }
-    //Op.count(2); //2x Comp
+    op.count(2); //2x Comp
 
     if (largest != i)
     {
         swap(data[i], data[largest]);
-        //Op.count(3);
-
-        /*if (Debug)
-            PrintHeap(A, HeapSize, to_string(A[largest]) + " swapped with " + to_string(A[i]));*/
+        op.count(3);
 
         Heapify(largest);
     }
@@ -199,13 +204,11 @@ void Heap<T, Compare>::SiftUp(int i)
     while (i > 0 && compare(data[Parent(i)], data[i]))
     {
         swap(data[Parent(i)], data[i]);
-        /*if (Debug)
-            PrintHeap(A, HeapSize, to_string(A[Parent(i)]) + " was swapped with " + to_string(A[i]));*/
         i = Parent(i);
-        //Op.count(4); //comp + swap
+        op.count(4); //comp + swap
     }
-    //if (i > 0)
-    //    Op.count(); //comp
+    if (i > 0)
+        op.count(); //comp
 }
 
 vector<list<int>> GenerateKSortedLists(int n, int k)
@@ -257,7 +260,7 @@ void Merge(list<int>& List1, list<int>& List2)
     List1.splice(it1, List2);
 }
 
-list<int> MergeKSortedLists(vector<list<int>> Lists)
+list<int> MergeKSortedLists(vector<list<int>> Lists, Operation Op)
 {
     list<int> result;
 
@@ -269,10 +272,18 @@ list<int> MergeKSortedLists(vector<list<int>> Lists)
             data.emplace_back(Lists.at(i).front(), i);
         }
     }
+    Op.count(data.size());
 
+#ifdef DEMO
     PrintVector(data, "Before Build Heap");
-    Heap<Element>heap(data);
+#endif // DEMO
+
+    Heap<Element>heap(data, Op);
+
+#ifdef DEMO
     heap.Print("After BuildHeap");
+#endif // DEMO
+
 
     while (!heap.Empty())
     {
@@ -294,14 +305,78 @@ list<int> MergeKSortedLists(vector<list<int>> Lists)
     return result;
 }
 
-int main()
+void Evaluate()
+{
+    Profiler profiler("Merge-K-Sorted-Lists");
+    vector<int> k_vector = { 5, 10, 100 };
+    const int n_range_min = 100;
+    const int n_range_max = 10000;
+    const int n_increment = 100;
+    const int k_range_min = 10;
+    const int k_range_max = 500;
+    const int k_increment = 10;
+    const int k_fixed_n = 10000;
+    const int nr_of_measurements = 5;
+
+    for (int m = 1; m <= nr_of_measurements; m++)
+    {
+        for (int& k : k_vector)
+        {
+            for (int n = n_range_min; n <= n_range_max; n += n_increment)
+            {
+                vector<list<int>> lists = GenerateKSortedLists(n, k);
+                Operation op = profiler.createOperation(("k_" + to_string(k)).c_str(), n);
+
+                list<int> result = MergeKSortedLists(lists, op);
+            }
+        }
+    }
+
+    for (int m = 1; m <= nr_of_measurements; m++)
+    {
+        for (int k = k_range_min; k <= k_range_max; k += k_increment)
+        {
+            vector<list<int>> lists = GenerateKSortedLists(k_fixed_n, k);
+            Operation op = profiler.createOperation(("n_" + to_string(k_fixed_n)).c_str(), k);
+
+            list<int> result = MergeKSortedLists(lists, op);
+        }
+    }
+
+    profiler.divideValues(("k_" + to_string(k_vector.at(0))).c_str(), nr_of_measurements);
+    profiler.divideValues(("k_" + to_string(k_vector.at(1))).c_str(), nr_of_measurements);
+    profiler.divideValues(("k_" + to_string(k_vector.at(2))).c_str(), nr_of_measurements);
+    profiler.divideValues(("n_" + to_string(k_fixed_n)).c_str(), nr_of_measurements);
+
+    profiler.createGroup("merge_for_fixed_k",
+        ("k_" + to_string(k_vector.at(0))).c_str(),
+        ("k_" + to_string(k_vector.at(1))).c_str(),
+        ("k_" + to_string(k_vector.at(2))).c_str()
+    );
+    profiler.createGroup("merge_for_fixed_n",
+        ("n_" + to_string(k_fixed_n)).c_str()
+    );
+    profiler.showReport();
+}
+
+void Demo()
 {
     vector<list<int>> lists = GenerateKSortedLists(20, 4);
     PrintLists(lists);
     /*Merge(lists.at(0), lists.at(1));
     PrintLists(lists);*/
 
-    list<int> result = MergeKSortedLists(lists);
-    PrintList(result, "The result after merge");
+    //list<int> result = MergeKSortedLists(lists);
+    //PrintList(result, "The result after merge");
+}
+
+int main()
+{
+#ifdef DEMO
+    Demo();
+#else
+    Evaluate();
+#endif // DEMO
+
     return 0;
 }
