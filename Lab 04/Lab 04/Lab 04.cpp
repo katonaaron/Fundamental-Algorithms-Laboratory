@@ -2,15 +2,22 @@
 #include <list>
 #include <vector>
 #include "Profiler.h"
+#include <cassert>
 
 using namespace std;
 
-//#define DEMO
+#define DEMO
 
 enum SORTED_ORDER { RANDOM = 0, ASC, DESC };
 
+#ifdef DEMO
 const int RANGE_MIN = 1;
 const int RANGE_MAX = 20;
+#else
+const int RANGE_MIN = 10;
+const int RANGE_MAX = 50000;
+#endif // DEMO
+
 
 template <class T>
 void PrintVector(vector<T> Vector, string Message = "")
@@ -31,8 +38,9 @@ void PrintList(list<int> List, string Message = "")
     cout << "- " << Message << "\n";
 }
 
-void PrintLists(vector<list<int>> Lists)
+void PrintLists(vector<list<int>> Lists, string Message = "")
 {
+    cout << Message << "\n";
     int i = 0;
     for (list<int>& l : Lists)
     {
@@ -328,6 +336,7 @@ void Evaluate()
                 Operation op = profiler.createOperation(("k_" + to_string(k)).c_str(), n);
 
                 list<int> result = MergeKSortedLists(lists, op);
+                assert(result.size() == n);
             }
         }
     }
@@ -361,13 +370,17 @@ void Evaluate()
 
 void Demo()
 {
-    vector<list<int>> lists = GenerateKSortedLists(20, 4);
-    PrintLists(lists);
-    /*Merge(lists.at(0), lists.at(1));
-    PrintLists(lists);*/
+    vector<list<int>> lists = GenerateKSortedLists(9, 2);
+    PrintLists(lists, "Initial vector of lists");
+    Merge(lists.at(0), lists.at(1));
+    PrintLists(lists, "The result after merging two lists");
 
-    //list<int> result = MergeKSortedLists(lists);
-    //PrintList(result, "The result after merge");
+    Profiler profiler("Demo");
+    Operation op = profiler.createOperation("dummy", 0);
+    lists = GenerateKSortedLists(20, 4);
+    PrintLists(lists, "------------------\n\nInitial vector of lists");
+    list<int> result = MergeKSortedLists(lists, op);
+    PrintList(result, "The result after merging all the lists");
 }
 
 int main()
