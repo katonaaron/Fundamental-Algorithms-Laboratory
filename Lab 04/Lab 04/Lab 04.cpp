@@ -6,11 +6,13 @@
  *	Implement correctly and efficiently an O(n * log k) method for merging k sorted sequences, where n is the total number of elements.
  *
  * Algorithm:
- *  For this algorithm a heap was used. The elements of the heap are a pair of values, the "list_index", which references to a list in the vector of lists, and "key", which is the smallest key from that list. 
+ *  Denote n the number of total elements, k the number of lists.
+ *  For this algorithm a heap was used. The elements of the heap are a pair of values: the "list_index", which references to a list in the vector of lists, and "key", 
+ *      which is the smallest key from that list. 
  *  1. From each given sorted lists, the key of the first element is inserted to a vector, paired with the index of the list.
- *  (1'. The constructor of the heap copies the vector to an interval vector.)
+ *  (1'. The constructor of the heap copies the vector to an internal vector.)
  *  2. The bottom up heap build procedure is used to create heap from the vector.
- *  3. While the heap is not empty, meaning that there exists lists that weren't fully merged:
+ *  3. While the heap is not empty, meaning that there are lists that weren't fully merged:
  *      3.1 Extract the smallest element from the heap.
  *      3.2 Transfer the corresponding node from the source list to the result list.
  *      3.3 If the list became empty after the removal, the smallest element from the heap is popped, meaning that from that list no element can be further added.
@@ -19,23 +21,25 @@
  *
  * Efficiency:
  *  Step 1, 1'and 2 of the algorithm represents the creation of the heap from the first elements of the lists. Each step is O(k): iterating through the first elements of the lists twice, then
- *      using the bottom up heap build procedure, which is O(n) in each case. This means that the complexity of these three steps is O(k).
+ *      using the bottom up heap build procedure, which is O(k) in every case. This means that the complexity of these three steps is 3 * O(k) == O(k).
  *  In step 3.1 an O(1) method was used to extract the smallest element of the heap. 
  *  In step 3.2, transferring a node from the beginning of a list to the end of another is O(1).
- *  In step 3.3, removing the root of a heap is done by putting the last element to the first position and applying heapify. So the complexity of this step is O(1) + O(h) = O(h) = O(log k). Because 
- *      the size of the heap can have maximum k elements, each representing a source list.
+ *  In step 3.3, removing the root of a heap is done by putting the last element to the first position and applying heapify. So the complexity of this step is O(1) + O(h) == O(h) == O(log k),
+ *      because the size of the heap can have maximum k elements, each representing a source list.
  *  In step 3.4, updating the root of the heap follows with the heapify procedure. So the complexity of this step is also O(1) + O(h) == O(h) == O(log k).
- *  Step 3 is a loop, which is repeated n times. Either step 3.3 or step 3.4 is processed, which are both O(log n) algorithms. So the total complexity of this 
+ *  Step 3 is a loop, which is repeated n times. Either step 3.3 or step 3.4 is processed, which are both O(log k) algorithms. So the total complexity of this 
  *      step is n * (O(1) + O(1) + O(log k)) == O(n * log k).
  *  In step 4, returning an element is O(1).
- * The total complexity of the algorithm is: O(k) + O(n log k) + O(1) == O(n * log k).
+
+ *  The total complexity of the algorithm is: O(k) + O(n log k) + O(1) == O(n * log k).
  *
  *
  * Observation:
  *  In the evaluation phase two types of experiments were done. 
  *  When k is a fixed value (10, 20, 100) and n is variable, log k is a constant value, so the complexity of the algorithm is O(n). This can be seen on the charts, for each fixed key, 
  *      the running time is linear.
- *  When n had a fixed value (10000), and k was variable, n is a constant, thus the complexity of the algorithm is O(log k). This can be seen on the chart, the growth rate of the running time is logarithmic.
+ *  When n is a fixed value (10000) and k is variable, n is a constant, thus the complexity of the algorithm is O(log k). This can be seen on the chart, the growth rate of the
+ *      running time is logarithmic.
  */
 
 #include <iostream>
