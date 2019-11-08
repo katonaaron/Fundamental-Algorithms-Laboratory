@@ -1,27 +1,31 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
+#include "Profiler.h"
+#include <cassert>
 
 using namespace std;
 
+//#define DEMO
+
 class UniversalHash {
     static const long long p = (long long)INT_MAX + 1;
-    const int bucketSize;
+    const size_t bucketSize;
 
     long long a;
     long long b;
 
 public:
-    UniversalHash(const int bucketSize) : bucketSize(bucketSize)
+    UniversalHash(const size_t bucketSize) : bucketSize(bucketSize)
     {
-        srand(time(0));
+        srand(time(NULL));
         a = rand() % (p - 1) + 1;
         b = rand() % p;
     };
 
     int operator() (int key)
     {
-        return ((a * key + b) % p) % bucketSize;
+        return abs(((a * key + b) % p) % bucketSize);
     }
 };
 
@@ -33,17 +37,20 @@ struct Entry {
 
 template <class Hash>
 class HashTable {
-    static const int bucketSize = 10007;
-
-    Entry* data[bucketSize];
-    const double fillingFactor;
+    const size_t bucketSize;
+    Entry** data;
     Hash auxiliaryHash;
-
+    size_t size = 0;
+    //Profiler
+    Operation op;
 public:
-    HashTable(double fillingFactor) : fillingFactor(fillingFactor), data(), auxiliaryHash(bucketSize) {}
+
+    HashTable(const size_t bucketSize, Operation op);
     void Insert(int key, const char* name);
     const char* Search(int key);
-
+    size_t Size();
+    size_t BucketSize();
+    ~HashTable();
 private:
     int hash(int auxiliaryHashValue, int i);
 
@@ -54,7 +61,13 @@ int HashTable<Hash>::hash(int auxiliaryHashValue, int i)
 {
     const int c1 = 13;
     const int c2 = 17;
-    return auxiliaryHashValue + c1 * i + c2 * (i << 1);
+    return (auxiliaryHashValue + c1 * i + c2 * (i << 1)) % bucketSize;
+}
+
+template<class Hash>
+HashTable<Hash>::HashTable(const size_t bucketSize, Operation op) : bucketSize(bucketSize), auxiliaryHash(bucketSize), op(op)
+{
+    data = new Entry * [bucketSize] {};
 }
 
 template<class Hash>
@@ -68,7 +81,13 @@ void HashTable<Hash>::Insert(int key, const char* name)
         if (data[hashValue] == nullptr)
         {
             data[hashValue] = new Entry();
-            data[hashValue]->id = key;            
+            data[hashValue]->id = key;
+            strcpy_s(data[hashValue]->name, name);
+            size++;
+            return;
+        }
+        else if (data[hashValue]->id == key)
+        {
             strcpy_s(data[hashValue]->name, name);
             return;
         }
@@ -84,6 +103,7 @@ const char* HashTable<Hash>::Search(int key)
     int auxiliaryHashValue = auxiliaryHash(key);
     int hashValue;
     do {
+        op.count();
         hashValue = hash(auxiliaryHashValue, i);
         if (data[hashValue] == nullptr)
         {
@@ -98,15 +118,97 @@ const char* HashTable<Hash>::Search(int key)
     return nullptr;
 }
 
+template<class Hash>
+size_t HashTable<Hash>::Size()
+{
+    return size;
+}
+
+template<class Hash>
+size_t HashTable<Hash>::BucketSize()
+{
+    return bucketSize;
+}
+
+template<class Hash>
+HashTable<Hash>::~HashTable()
+{
+    for (int i = 0; i < bucketSize; i++)
+    {
+        delete data[i];
+    }
+    delete data;
+}
+
+
+
 void Demo()
 {
-    HashTable<UniversalHash> ht(0.8);
+    Profiler profiler("Demo");
+    Operation op = profiler.createOperation("dummy", 0);
+
+    const size_t bucketSize = 4;
+
+    HashTable<UniversalHash> ht(bucketSize, op);
     ht.Insert(1, "name1");
-    cout << ht.Search(1);
+    ht.Insert(2, "name2");
+    ht.Insert(INT_MIN, "nameINT_MIN");
+    ht.Insert(INT_MAX, "nameINT_MAX");
+    ht.Insert(2, "name22");
+    cout << ht.Search(1) << "\n";
+    cout << ht.Search(2) << "\n";
+    cout << ht.Search(INT_MIN) << "\n";
+    cout << ht.Search(INT_MAX) << "\n";
+}
+
+
+void GenerateInput(int A[], int Size)
+{
+    for (int i = 0; i < Size; i++)
+    {
+        A[i] = i;
+    }
+}
+
+void Evaluate()
+{
+    Profiler profiler("Hash-Table");
+    const size_t bucketSize = 10007;
+    static int data[bucketSize];
+    const double loadFactors[] = { 0.8, 0.85, 0.9, 0.95, 0.99 };
+    for (int i = 0; i < sizeof(loadFactors) / sizeof(loadFactors[0]); i++)
+    {
+        Operation op = profiler.createOperation(("load_factor_" + to_string(loadFactors[i])).c_str(), 0);
+        HashTable<UniversalHash> ht(bucketSize, op);
+        int size = loadFactors[i] * bucketSize;
+
+        FillRandomArray(data, size);
+        for (int j = 0; j < size; j++)
+        {
+            ht.Insert(data[j], ("name" + to_string(data[j])).c_str());
+        }
+        for (int j = 0; j < size; j++)
+        {
+            const char* name = ht.Search(data[j]);
+            assert(name != nullptr);
+            assert(strcmp(name, ("name" + to_string(data[j])).c_str()) == 0);
+        }
+        profiler.divideValues(("load_factor_" + to_string(loadFactors[i])).c_str(), size);
+
+    }
+    for (int i = 0; i < sizeof(loadFactors) / sizeof(loadFactors[0]); i++)
+    {
+        profiler.divideValues(("load_factor_" + to_string(loadFactors[i])).c_str(), 1);
+    }
+    profiler.showReport();
 }
 
 int main()
 {
+#ifdef DEMO
     Demo();
+#else
+    Evaluate();
+#endif // DEMO    
     return 0;
 }
