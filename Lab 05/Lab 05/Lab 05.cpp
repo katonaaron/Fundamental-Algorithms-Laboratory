@@ -7,7 +7,7 @@
 
 using namespace std;
 
-#define DEMO
+//#define DEMO
 
 class UniversalHash {
     static const long long p = 2147483659;
@@ -46,7 +46,7 @@ public:
 
     HashTable(const size_t bucketSize);
     void Insert(int key, const char* name);
-    const char* Search(int key);
+    const char* Search(int key, int& effort);
     size_t Size();
     size_t BucketSize();
     ~HashTable();
@@ -72,7 +72,7 @@ HashTable<Hash>::HashTable(const size_t bucketSize) : bucketSize(bucketSize), au
 template<class Hash>
 void HashTable<Hash>::Insert(int key, const char* name)
 {
-    int i = 0;
+    unsigned int i = 0;
     int auxiliaryHashValue = auxiliaryHash(key);
     int hashValue;
     do {
@@ -96,19 +96,21 @@ void HashTable<Hash>::Insert(int key, const char* name)
 }
 
 template<class Hash>
-const char* HashTable<Hash>::Search(int key)
+const char* HashTable<Hash>::Search(int key, int& effort)
 {
-    int i = 0;
+    unsigned int i = 0;
     int auxiliaryHashValue = auxiliaryHash(key);
     int hashValue;
     do {
         hashValue = hash(auxiliaryHashValue, i);
         if (data[hashValue] == nullptr)
         {
+            effort = i + 1;
             return nullptr;
         }
         if (data[hashValue]->id == key)
         {
+            effort = i + 1;
             return data[hashValue]->name;
         }
         i++;
@@ -131,7 +133,7 @@ size_t HashTable<Hash>::BucketSize()
 template<class Hash>
 HashTable<Hash>::~HashTable()
 {
-    for (int i = 0; i < bucketSize; i++)
+    for (unsigned int i = 0; i < bucketSize; i++)
     {
         delete data[i];
     }
@@ -143,6 +145,7 @@ HashTable<Hash>::~HashTable()
 void Demo()
 {
     const size_t bucketSize = 4;
+    int effort;
 
     HashTable<UniversalHash> ht(bucketSize);
     ht.Insert(1, "name1");
@@ -150,55 +153,119 @@ void Demo()
     ht.Insert(INT_MIN, "nameINT_MIN");
     ht.Insert(INT_MAX, "nameINT_MAX");
     ht.Insert(2, "name22");
-    cout << ht.Search(1) << "\n";
-    cout << ht.Search(2) << "\n";
-    cout << ht.Search(INT_MIN) << "\n";
-    cout << ht.Search(INT_MAX) << "\n";
+    cout << ht.Search(1, effort) << "\n";
+    cout << ht.Search(2, effort) << "\n";
+    cout << ht.Search(INT_MIN, effort) << "\n";
+    cout << ht.Search(INT_MAX, effort) << "\n";
 }
 
-
-void GenerateInput(int A[], int Size)
+void RandomPermutate(int a[], size_t size)
 {
-    for (int i = 0; i < Size; i++)
+    srand(time(NULL));
+    int index;
+
+    while (size > 1)
     {
-        A[i] = i;
+        index = rand() % size;
+        swap(a[index], a[--size]);
     }
 }
 
 void Evaluate()
 {
     const size_t bucketSize = 10007;
-    static int data[bucketSize];
+    const unsigned int nrOfSearches = 3000;
+    const unsigned int nrOfMeasurements = 5;
+    const int range_min = 0;
+    const int range_max = 50000;
     const double loadFactors[] = { 0.8, 0.85, 0.9, 0.95, 0.99 };
 
-    for (int i = 0; i < sizeof(loadFactors) / sizeof(loadFactors[0]); i++)
+    const int nrLoadFactors = sizeof(loadFactors) / sizeof(loadFactors[0]);
+    double effortAvgFound[nrLoadFactors] = {};
+    double effortAvgNotFound[nrLoadFactors] = {};
+    double effortMaxFound[nrLoadFactors] = {};
+    double effortMaxNotFound[nrLoadFactors] = {};
+    static int data[bucketSize];
+
+    for (unsigned int i = 0; i < nrOfMeasurements; i++)
     {
-        HashTable<UniversalHash> ht(bucketSize);
-        int size = loadFactors[i] * bucketSize;
-
-        FillRandomArray(data, size, 0, 50000, true, 0);
-        for (int j = 0; j < size; j++)
+        for (int loadFactorIndex = 0; loadFactorIndex < nrLoadFactors; loadFactorIndex++)
         {
-            ht.Insert(data[j], ("name" + to_string(data[j])).c_str());
-        }
+            HashTable<UniversalHash> ht(bucketSize);
+            int size = (int)(loadFactors[loadFactorIndex] * bucketSize);
+            int effort, totalEffort, maxEffort;
 
-        if (size != ht.Size())
-        {
-            assert(size == ht.Size());
-        }
-        for (int j = 0; j < size; j++)
-        {
-            const char* name = ht.Search(data[j]);
-            assert(name != nullptr);
-            assert(strcmp(name, ("name" + to_string(data[j])).c_str()) == 0);
-        }
-        //profiler.divideValues(("load_factor_" + to_string(loadFactors[i])).c_str(), size);
+            FillRandomArray(data, size, range_min, range_max, true, 0);
 
+            //Insert elements
+            for (int j = 0; j < size; j++)
+            {
+                ht.Insert(data[j], ("name" + to_string(data[j])).c_str());
+            }
+
+            //Check for correct behaviour
+            if (size != ht.Size())
+            {
+                assert(size == ht.Size());
+            }
+            for (int j = 0; j < size; j++)
+            {
+                const char* name = ht.Search(data[j], effort);
+                assert(name != nullptr);
+                assert(strcmp(name, ("name" + to_string(data[j])).c_str()) == 0);
+            }
+
+            //Evaluate search time     
+            //Searching for existing elements
+            RandomPermutate(data, size);
+            totalEffort = 0;
+            maxEffort = -1;
+            for (int j = 0; j < nrOfSearches / 2; j++)
+            {
+                const char* name = ht.Search(data[j], effort);
+                totalEffort += effort;
+                maxEffort = max(effort, maxEffort);
+                assert(name != nullptr);
+                assert(strcmp(name, ("name" + to_string(data[j])).c_str()) == 0);
+            }
+            effortAvgFound[loadFactorIndex] += totalEffort / (nrOfSearches / 2);
+            effortMaxFound[loadFactorIndex] += maxEffort;
+
+            //Searching for non-existing elements
+            totalEffort = 0;
+            maxEffort = -1;
+            for (int j = 1; j <= (nrOfSearches + 1) / 2; j++)
+            {
+                const char* name = ht.Search(range_max + j, effort);
+                totalEffort += effort;
+                maxEffort = max(effort, maxEffort);
+                assert(name == nullptr);
+            }
+            effortAvgNotFound[loadFactorIndex] += totalEffort / ((nrOfSearches + 1) / 2);
+            effortMaxNotFound[loadFactorIndex] += maxEffort;
+        }
     }
-    for (int i = 0; i < sizeof(loadFactors) / sizeof(loadFactors[0]); i++)
+    for (unsigned int i = 0; i < nrLoadFactors; i++)
     {
-        //profiler.divideValues(("load_factor_" + to_string(loadFactors[i])).c_str(), 1);
+        effortAvgFound[i] /= nrOfMeasurements;
+        effortMaxFound[i] /= nrOfMeasurements;
+        effortAvgNotFound[i] /= nrOfMeasurements;
+        effortMaxNotFound[i] /= nrOfMeasurements;
     }
+
+    ofstream g("output.html");
+    g << "<!DOCTYPE html><html><body>";
+    g << "<table><tr><th>Filling factor</th><th>Avg. Effort found</th><th>Max. Effort found</th><th>Avg. Effort not-found</th><th>Max. Effort not-found</th></tr>";
+    for (unsigned int i = 0; i < nrLoadFactors; i++)
+    {
+        g << "<tr><td>" << loadFactors[i] << "</td><td>"
+            << effortAvgFound[i] << "</td><td>"
+            << effortMaxFound[i] << "</td><td>"
+            << effortAvgNotFound[i] << "</td><td>"
+            << effortMaxNotFound[i] << "</td></tr>";
+    }
+    g << "</table></body></html>";
+    g.close();
 }
 
 int main()
@@ -208,5 +275,14 @@ int main()
 #else
     Evaluate();
 #endif // DEMO    
+
+    /* int a[] = { 1, 2, 3, 4 };
+     const int size = sizeof(a) / sizeof(a[0]);
+     RandomPermutate(a, size);
+     for (int i = 0; i < size; i++)
+     {
+         cout << a[i] << " ";
+     }
+     cout << "\n";*/
     return 0;
 }
