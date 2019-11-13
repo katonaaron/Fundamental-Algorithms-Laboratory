@@ -3,6 +3,8 @@
 #include <time.h>
 #include <cassert>
 
+#include "Profiler.h"
+
 using namespace std;
 
 #define DEMO
