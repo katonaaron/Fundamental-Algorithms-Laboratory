@@ -1,15 +1,14 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
-#include "Profiler.h"
 #include <cassert>
 
 using namespace std;
 
-//#define DEMO
+#define DEMO
 
 class UniversalHash {
-    static const long long p = (long long)INT_MAX + 1;
+    static const long long p = 2147483659;
     const size_t bucketSize;
 
     long long a;
@@ -29,23 +28,21 @@ public:
     }
 };
 
-struct Entry {
-    static const int nameSize = 30;
-    int id;
-    char name[nameSize];
-};
-
 template <class Hash>
 class HashTable {
+    struct Entry {
+        static const int nameSize = 30;
+        int id;
+        char name[nameSize];
+    };
+
     const size_t bucketSize;
     Entry** data;
     Hash auxiliaryHash;
     size_t size = 0;
-    //Profiler
-    Operation op;
 public:
 
-    HashTable(const size_t bucketSize, Operation op);
+    HashTable(const size_t bucketSize);
     void Insert(int key, const char* name);
     const char* Search(int key);
     size_t Size();
@@ -65,7 +62,7 @@ int HashTable<Hash>::hash(int auxiliaryHashValue, int i)
 }
 
 template<class Hash>
-HashTable<Hash>::HashTable(const size_t bucketSize, Operation op) : bucketSize(bucketSize), auxiliaryHash(bucketSize), op(op)
+HashTable<Hash>::HashTable(const size_t bucketSize) : bucketSize(bucketSize), auxiliaryHash(bucketSize)
 {
     data = new Entry * [bucketSize] {};
 }
@@ -103,7 +100,6 @@ const char* HashTable<Hash>::Search(int key)
     int auxiliaryHashValue = auxiliaryHash(key);
     int hashValue;
     do {
-        op.count();
         hashValue = hash(auxiliaryHashValue, i);
         if (data[hashValue] == nullptr)
         {
@@ -144,12 +140,9 @@ HashTable<Hash>::~HashTable()
 
 void Demo()
 {
-    Profiler profiler("Demo");
-    Operation op = profiler.createOperation("dummy", 0);
-
     const size_t bucketSize = 4;
 
-    HashTable<UniversalHash> ht(bucketSize, op);
+    HashTable<UniversalHash> ht(bucketSize);
     ht.Insert(1, "name1");
     ht.Insert(2, "name2");
     ht.Insert(INT_MIN, "nameINT_MIN");
@@ -172,20 +165,24 @@ void GenerateInput(int A[], int Size)
 
 void Evaluate()
 {
-    Profiler profiler("Hash-Table");
     const size_t bucketSize = 10007;
     static int data[bucketSize];
     const double loadFactors[] = { 0.8, 0.85, 0.9, 0.95, 0.99 };
+
     for (int i = 0; i < sizeof(loadFactors) / sizeof(loadFactors[0]); i++)
     {
-        Operation op = profiler.createOperation(("load_factor_" + to_string(loadFactors[i])).c_str(), 0);
-        HashTable<UniversalHash> ht(bucketSize, op);
+        HashTable<UniversalHash> ht(bucketSize);
         int size = loadFactors[i] * bucketSize;
 
-        FillRandomArray(data, size);
+        FillRandomArray(data, size, 0, 50000, true, 0);
         for (int j = 0; j < size; j++)
         {
             ht.Insert(data[j], ("name" + to_string(data[j])).c_str());
+        }
+
+        if (size != ht.Size())
+        {
+            assert(size == ht.Size());
         }
         for (int j = 0; j < size; j++)
         {
@@ -193,14 +190,13 @@ void Evaluate()
             assert(name != nullptr);
             assert(strcmp(name, ("name" + to_string(data[j])).c_str()) == 0);
         }
-        profiler.divideValues(("load_factor_" + to_string(loadFactors[i])).c_str(), size);
+        //profiler.divideValues(("load_factor_" + to_string(loadFactors[i])).c_str(), size);
 
     }
     for (int i = 0; i < sizeof(loadFactors) / sizeof(loadFactors[0]); i++)
     {
-        profiler.divideValues(("load_factor_" + to_string(loadFactors[i])).c_str(), 1);
+        //profiler.divideValues(("load_factor_" + to_string(loadFactors[i])).c_str(), 1);
     }
-    profiler.showReport();
 }
 
 int main()
