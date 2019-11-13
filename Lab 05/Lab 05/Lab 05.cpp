@@ -2,12 +2,22 @@
 #include <fstream>
 #include <time.h>
 #include <cassert>
+#include <cstdlib>
 
 #include "Profiler.h"
 
 using namespace std;
 
 //#define DEMO
+
+long lrand()
+{
+    if (sizeof(int) < sizeof(long))
+        return (static_cast<long>(rand()) << (sizeof(int) * 7)) |
+        rand();
+
+    return rand();
+}
 
 class UniversalHash {
     static const long long p = 2147483659;
@@ -19,9 +29,10 @@ class UniversalHash {
 public:
     UniversalHash(const size_t bucketSize) : bucketSize(bucketSize)
     {
-        srand(time(NULL));
-        a = rand() % (p - 1) + 1;
-        b = rand() % p;
+        a = lrand() % (p - 1) + 1;
+        b = lrand() % p;
+        assert(a > 0);
+        assert(b >= 0);
     };
 
     int operator() (int key)
@@ -161,7 +172,6 @@ void Demo()
 
 void RandomPermutate(int a[], size_t size)
 {
-    srand(time(NULL));
     int index;
 
     while (size > 1)
@@ -222,11 +232,14 @@ void Evaluate()
             maxEffort = -1;
             for (int j = 0; j < nrOfSearches / 2; j++)
             {
-                const char* name = ht.Search(data[j], effort);
+                //const char* name = ht.Search(data[j], effort);
+                int ind = rand() % size;
+                const char* name = ht.Search(data[ind], effort);
                 totalEffort += effort;
                 maxEffort = max(effort, maxEffort);
                 assert(name != nullptr);
-                assert(strcmp(name, ("name" + to_string(data[j])).c_str()) == 0);
+                //assert(strcmp(name, ("name" + to_string(data[j])).c_str()) == 0);
+                assert(strcmp(name, ("name" + to_string(data[ind])).c_str()) == 0);
             }
             effortAvgFound[loadFactorIndex] += totalEffort / (nrOfSearches / 2);
             effortMaxFound[loadFactorIndex] += maxEffort;
@@ -254,7 +267,7 @@ void Evaluate()
     }
 
     ofstream g("output.html");
-    g << "<!DOCTYPE html><html><body>";
+    g << "<!DOCTYPE html><html><head><style>table {  font-family: \"Trebuchet MS\", Arial, Helvetica, sans-serif;  border-collapse: collapse;  width: 100%;}table td, table th {  border: 1px solid #ddd;  padding: 8px;}table tr:nth-child(even){background-color: #f2f2f2;}table tr:hover {background-color: #ddd;}table th {  padding-top: 12px;  padding-bottom: 12px;  text-align: left;  background-color: #4CAF50;  color: white;}</style></head><body>";
     g << "<table><tr><th>Filling factor</th><th>Avg. Effort found</th><th>Max. Effort found</th><th>Avg. Effort not-found</th><th>Max. Effort not-found</th></tr>";
     for (unsigned int i = 0; i < nrLoadFactors; i++)
     {
@@ -266,10 +279,12 @@ void Evaluate()
     }
     g << "</table></body></html>";
     g.close();
+    system("output.html");
 }
 
 int main()
 {
+    srand(time(NULL));
 #ifdef DEMO
     Demo();
 #else
