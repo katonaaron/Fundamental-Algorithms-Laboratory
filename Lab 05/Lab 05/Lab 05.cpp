@@ -225,6 +225,16 @@ void Demo()
     }
 }
 
+void RandomPermutate(int a[], size_t size)
+{
+    int index;
+    while (size > 1)
+    {
+        index = rand() % size;
+        swap(a[index], a[--size]);
+    }
+}
+
 void Evaluate()
 {
     const size_t bucketSize = 10007;
@@ -271,18 +281,18 @@ void Evaluate()
 
             //Evaluate search time     
             //Searching for existing elements
+            RandomPermutate(data, size);
             totalEffort = 0;
             maxEffort = -1;
             for (int j = 0; j < nrOfSearches / 2; j++)
             {
-                int ind = rand() % size;
-                const char* name = ht.Search(data[ind], effort);
+                const char* name = ht.Search(data[j], effort);
 
                 totalEffort += effort;
                 maxEffort = max(effort, maxEffort);
 
                 assert(name != nullptr);
-                assert(strcmp(name, ("name" + to_string(data[ind])).c_str()) == 0);
+                assert(strcmp(name, ("name" + to_string(data[j])).c_str()) == 0);
             }
             effortAvgFound[loadFactorIndex] += totalEffort / (nrOfSearches / 2);
             effortMaxFound[loadFactorIndex] += maxEffort;
