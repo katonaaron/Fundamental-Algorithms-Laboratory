@@ -8,7 +8,7 @@
 
 using namespace std;
 
-//#define DEMO
+#define DEMO
 
 long lrand()
 {
@@ -61,10 +61,44 @@ public:
     size_t Size();
     size_t BucketSize();
     ~HashTable();
+
+    //DEMO
+    void PrintData();
 private:
     int hash(int auxiliaryHashValue, int i);
 
 };
+
+template<class Hash>
+void HashTable<Hash>::PrintData()
+{
+    cout << "Hashtable: size = " << Size() << ", bucket size = " << bucketSize << "\n";
+    cout << "keys:\t";
+    for (int i = 0; i < bucketSize; i++)
+    {
+        if (data[i] == nullptr)
+        {
+            cout << "\tnull";
+        }
+        else
+        {
+            cout << "\t" << data[i]->id;
+        }
+    }
+    cout << "\nvalues: ";
+    for (int i = 0; i < bucketSize; i++)
+    {
+        if (data[i] == nullptr)
+        {
+            cout << "\tnull";
+        }
+        else
+        {
+            cout << "\t" << data[i]->name;
+        }
+    }
+    cout << "\n\n";
+}
 
 template<class Hash>
 int HashTable<Hash>::hash(int auxiliaryHashValue, int i)
@@ -88,6 +122,10 @@ void HashTable<Hash>::Insert(int key, const char* name)
     int hashValue;
     do {
         hashValue = hash(auxiliaryHashValue, i);
+#ifdef DEMO
+        cout << "\tTrying to insert at position " << hashValue << "\n";
+#endif // DEMO
+
         if (data[hashValue] == nullptr)
         {
             data[hashValue] = new Entry();
@@ -114,6 +152,9 @@ const char* HashTable<Hash>::Search(int key, int& effort)
     int hashValue;
     do {
         hashValue = hash(auxiliaryHashValue, i);
+#ifdef DEMO
+        cout << "\tSearching at position " << hashValue << "\n";
+#endif // DEMO
         if (data[hashValue] == nullptr)
         {
             effort = i + 1;
@@ -155,29 +196,32 @@ HashTable<Hash>::~HashTable()
 
 void Demo()
 {
-    const size_t bucketSize = 4;
+    const size_t bucketSize = 5;
     int effort;
 
     HashTable<UniversalHash> ht(bucketSize);
-    ht.Insert(1, "name1");
-    ht.Insert(2, "name2");
-    ht.Insert(INT_MIN, "nameINT_MIN");
-    ht.Insert(INT_MAX, "nameINT_MAX");
-    ht.Insert(2, "name22");
-    cout << ht.Search(1, effort) << "\n";
-    cout << ht.Search(2, effort) << "\n";
-    cout << ht.Search(INT_MIN, effort) << "\n";
-    cout << ht.Search(INT_MAX, effort) << "\n";
-}
 
-void RandomPermutate(int a[], size_t size)
-{
-    int index;
+    int keys[] = { 1, 2, INT_MIN, INT_MAX, 0, 0 };
+    char values[][30] = { "name1", "name2", "nameINT_MIN", "nameINT_MAX", "name0", "name0_2" };
+    const int size = sizeof(keys) / sizeof(keys[0]);
 
-    while (size > 1)
+    ht.PrintData();
+
+
+    for (int i = 0; i < size; i++)
     {
-        index = rand() % size;
-        swap(a[index], a[--size]);
+        cout << "Inserting \"" << keys[i] << "\" with value \"" << values[i] << "\"\n";
+        ht.Insert(keys[i], values[i]);
+        ht.PrintData();
+    }
+
+
+
+    for (int i = 0; i < size; i++)
+    {
+        cout << "Searching for \"" << keys[i] << "\"\n";
+        const char* result = ht.Search(keys[i], effort);
+        cout << "result: " << result << "\n\n";
     }
 }
 
@@ -197,7 +241,7 @@ void Evaluate()
     double effortMaxNotFound[nrLoadFactors] = {};
     static int data[bucketSize];
 
-    for (unsigned int i = 0; i < nrOfMeasurements; i++)
+    for (unsigned int m = 0; m < nrOfMeasurements; m++)
     {
         for (int loadFactorIndex = 0; loadFactorIndex < nrLoadFactors; loadFactorIndex++)
         {
@@ -213,7 +257,7 @@ void Evaluate()
                 ht.Insert(data[j], ("name" + to_string(data[j])).c_str());
             }
 
-            //Check for correct behaviour
+            //Check for correct insertion
             if (size != ht.Size())
             {
                 assert(size == ht.Size());
@@ -227,18 +271,17 @@ void Evaluate()
 
             //Evaluate search time     
             //Searching for existing elements
-            RandomPermutate(data, size);
             totalEffort = 0;
             maxEffort = -1;
             for (int j = 0; j < nrOfSearches / 2; j++)
             {
-                //const char* name = ht.Search(data[j], effort);
                 int ind = rand() % size;
                 const char* name = ht.Search(data[ind], effort);
+
                 totalEffort += effort;
                 maxEffort = max(effort, maxEffort);
+
                 assert(name != nullptr);
-                //assert(strcmp(name, ("name" + to_string(data[j])).c_str()) == 0);
                 assert(strcmp(name, ("name" + to_string(data[ind])).c_str()) == 0);
             }
             effortAvgFound[loadFactorIndex] += totalEffort / (nrOfSearches / 2);
