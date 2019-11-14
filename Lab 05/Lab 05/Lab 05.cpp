@@ -1,3 +1,15 @@
+/**
+ * @author Katona Aron
+ * @group 30423
+ *
+ * Problem specification:
+ *	Implement correctly and efficiently the insert and search operations in a hash table using open addressing and quadratic probing.
+ *  The position of each Entry in the Hash Table will be calculated by applying the required hash function on the id member of the struct.
+ *  The name member of the struct will be used only to exemplify the correctness of the search operation, and is not needed when 
+ *  evaluating the performance.
+ *
+ * 
+ */
 #include <iostream>
 #include <fstream>
 #include <time.h>
@@ -222,6 +234,19 @@ void Demo()
         cout << "Searching for \"" << keys[i] << "\"\n";
         const char* result = ht.Search(keys[i], effort);
         cout << "result: " << result << "\n\n";
+    }
+
+    const int nrOfFailedSearches = 3;
+    for (int i = 0; i < nrOfFailedSearches; i++)
+    {
+        int key = rand() % 1000 + 100;
+        cout << "Searching for \"" << key << "\"\n";
+        const char* result = ht.Search(key, effort);
+
+        if (result == nullptr)
+            cout << "result: not found\n\n";
+        else
+            cout << "result: " << result << "\n\n";
     }
 }
 
