@@ -1,3 +1,18 @@
+/**
+ * @author Katona Aron
+ * @group 30423
+ *
+ * Problem specification:
+ *	Implement correctly and efficiently the management operations of an order statistics tree. A balanced, augmented Binary Search Tree
+ *  has to be used. Each node in the tree holds, besides the necessary information, also the size field (i.e. the size of the sub-tree
+ *  rooted at the node).
+ *
+ * Efficiency:
+ *  BUILD_TREE:
+ *      A post-order traversal is used to create a perfectly balanced tree from the range 1...n
+ *      
+ */
+
 #include <iostream>
 #include <cassert>
 #include <time.h>
@@ -5,7 +20,7 @@
 
 using namespace std;
 
-//#define DEMO
+#define DEMO
 
 class OSTree
 {
