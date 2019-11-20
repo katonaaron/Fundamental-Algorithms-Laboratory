@@ -32,7 +32,7 @@ class OSTree
     void DecrementSizeOfAncestors(Node* node, Operation op);
 
     //Demo
-    void PrintRec(Node* node, int indent);
+    void Print(Node* node, int indent);
 public:
     ~OSTree();
     static OSTree* Build(int n, Operation op);
@@ -90,7 +90,7 @@ OSTree::~OSTree()
 void OSTree::Print()
 {
     cout << "Tree:\n";
-    PrintRec(root, 0);
+    Print(root, 0);
     cout << "\n";
 }
 
@@ -218,7 +218,7 @@ void OSTree::DecrementSizeOfAncestors(Node* node, Operation op)
     op.count();
 }
 
-void OSTree::PrintRec(Node* node, int indent)
+void OSTree::Print(Node* node, int indent)
 {
     cout << string(indent, ' ');
     if (node == nullptr)
@@ -227,8 +227,8 @@ void OSTree::PrintRec(Node* node, int indent)
     }
     else {
         cout << node->data << "\n";
-        PrintRec(node->left, indent + 4);
-        PrintRec(node->right, indent + 4);
+        Print(node->left, indent + 4);
+        Print(node->right, indent + 4);
     }
 }
 
