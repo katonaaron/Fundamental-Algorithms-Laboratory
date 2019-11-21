@@ -9,7 +9,20 @@
  *
  * Efficiency:
  *  BUILD_TREE:
- *      A post-order traversal is used to create a perfectly balanced tree from the range 1...n
+ *      A post-order traversal is used to create a perfectly balanced tree with keys from the range 1...n. It's a divide and conquer
+ *      algorithm. By applying the Master theorem for a = 2, b = 2, c = 0, we obtain O(n) running time. And the resulting binary
+ *      search tree will be perfectly balanced, thus its height is log n, where n = number of nodes in the tree.
+ *  
+ *  OS_SELECT:
+ *      The algorithm is similar to QuickSelect: We partition the input data in two parts, separated by a single element "q". If the size of
+ *      the left partition + 1 = r is equal to the required index "i", we return q as the ith element, if it's smaller, we search i in the left
+ *      partition, if it's greater we search i-r in the right partition.
+ *      The major improvement over QuickSelect is, that the latter performs the partitioning procedure in O(n) time, while OS_SELECT does
+ *      only O(1) operations at each level. The partitioning is done by selecting the left or the right child of the current root. The tree
+ *      is balanced so it splits the input data in two at each level. Thus by applying the Master theorem for a = 1, b = 2, c = 0, we obtain 
+ *      O( log n) running time.
+ *
+ *  OS_DELETE:
  *      
  */
 
