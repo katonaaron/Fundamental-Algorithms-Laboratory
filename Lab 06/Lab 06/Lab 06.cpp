@@ -12,18 +12,18 @@
  *      A post-order traversal is used to create a perfectly balanced tree with keys from the range 1...n. It's a divide and conquer
  *      algorithm. By applying the Master theorem for a = 2, b = 2, c = 0, we obtain O(n) running time. And the resulting binary
  *      search tree will be perfectly balanced, thus its height is log n, where n = number of nodes in the tree.
- *  
+ *
  *  OS_SELECT:
  *      The algorithm is similar to QuickSelect: We partition the input data in two parts, separated by a single element "q". If the size of
  *      the left partition + 1 = r is equal to the required index "i", we return q as the ith element, if it's smaller, we search i in the left
  *      partition, if it's greater we search i-r in the right partition.
  *      The major improvement over QuickSelect is, that the latter performs the partitioning procedure in O(n) time, while OS_SELECT does
  *      only O(1) operations at each level. The partitioning is done by selecting the left or the right child of the current root. The tree
- *      is balanced so it splits the input data in two at each level. Thus by applying the Master theorem for a = 1, b = 2, c = 0, we obtain 
+ *      is balanced so it splits the input data in two at each level. Thus by applying the Master theorem for a = 1, b = 2, c = 0, we obtain
  *      O( log n) running time.
  *
  *  OS_DELETE:
- *      
+ *
  */
 
 #include <iostream>
@@ -54,10 +54,9 @@ class OSTree
     OSTree();
     static Node* BuildPBTFromRange(int range_min, int range_max, Operation op);
 
-    Node* FindMin(Node* node, Operation op);
-    Node* Select(Node* root, int i, Operation op);
+    Node* FindMin(Node* node, Operation op, bool decrement_size = false);
+    Node* Select(Node* root, int i, Operation op, bool decrement_size = false);
     Node* Delete(Node* node, Operation op);
-    void DecrementSizeOfAncestors(Node* node, Operation op);
 
     //Demo
     void Print(Node* node, int indent);
@@ -97,9 +96,8 @@ int OSTree::Select(int i, Operation op)
 
 void OSTree::Delete(int i, Operation op)
 {
-    Node* node = Select(root, i, op);
+    Node* node = Select(root, i, op, true);
     node = Delete(node, op);
-    DecrementSizeOfAncestors(node, op);
     node->left = node->right = nullptr;
     delete node;
 }
@@ -151,7 +149,7 @@ OSTree::Node* OSTree::BuildPBTFromRange(int range_min, int range_max, Operation 
     return nullptr;
 }
 
-OSTree::Node* OSTree::FindMin(Node* node, Operation op)
+OSTree::Node* OSTree::FindMin(Node* node, Operation op, bool decrement_size)
 {
     op.count();
     if (node == nullptr)
@@ -159,6 +157,8 @@ OSTree::Node* OSTree::FindMin(Node* node, Operation op)
 
     while (node->left != nullptr)
     {
+        if (decrement_size)
+            node->size--;
         node = node->left;
         op.count();
     }
@@ -166,11 +166,14 @@ OSTree::Node* OSTree::FindMin(Node* node, Operation op)
     return node;
 }
 
-OSTree::Node* OSTree::Select(OSTree::Node* root, int i, Operation op)
+OSTree::Node* OSTree::Select(OSTree::Node* root, int i, Operation op, bool decrement_size)
 {
     op.count();
     if (root == nullptr)
         return nullptr;
+
+    if (decrement_size)
+        root->size--;
 
     int r = 1;
     op.count(2);
@@ -188,10 +191,10 @@ OSTree::Node* OSTree::Select(OSTree::Node* root, int i, Operation op)
     else if (i < r)
     {
         op.count();
-        return Select(root->left, i, op);
+        return Select(root->left, i, op, decrement_size);
     }
     op.count();
-    return Select(root->right, i - r, op);
+    return Select(root->right, i - r, op, decrement_size);
 }
 
 OSTree::Node* OSTree::Delete(Node* node, Operation op)
@@ -199,7 +202,7 @@ OSTree::Node* OSTree::Delete(Node* node, Operation op)
     op.count();
     if (node->left != nullptr && node->right != nullptr)
     {
-        Node* successor = FindMin(node->right, op);
+        Node* successor = FindMin(node->right, op, true);
         swap(node->data, successor->data);
         node = successor;
         op.count(5);
@@ -232,20 +235,6 @@ OSTree::Node* OSTree::Delete(Node* node, Operation op)
     return node;
 }
 
-void OSTree::DecrementSizeOfAncestors(Node* node, Operation op)
-{
-    op.count();
-    if (node == nullptr)
-        return;
-    while (node->parent != nullptr)
-    {
-        node = node->parent;
-        node->size--;
-        op.count(3);
-    }
-    op.count();
-}
-
 void OSTree::Print(Node* node, int indent)
 {
     cout << string(indent, ' ');
@@ -254,7 +243,7 @@ void OSTree::Print(Node* node, int indent)
         cout << "null\n";
     }
     else {
-        cout << node->data << "\n";
+        cout << node->data << "(" << node->size << ")" << "\n";
         Print(node->left, indent + 4);
         Print(node->right, indent + 4);
     }
@@ -286,7 +275,7 @@ void Demo()
 
     for (int i = 0; i < nrOfSearches; i++)
     {
-        int index = rand() % (os->Size() - 1) + 1;
+        int index = rand() % os->Size() + 1;
         cout << "Searching for \"" << index << "\". Result: \"" << os->Select(index, op) << "\"\n";
         os->Delete(index, op);
         os->Print();
@@ -316,7 +305,7 @@ void Evaluate()
 
             for (int i = 0; i < n; i++)
             {
-                int index = os->Size() == 1 ? 1 : rand() % (os->Size() - 1) + 1;
+                int index = rand() % os->Size() + 1;
                 os->Select(index, opSelect);
                 os->Delete(index, opDelete);
             }
