@@ -7,7 +7,6 @@
  *  has to be used. Each node in the tree holds, besides the necessary information, also the size field (i.e. the size of the sub-tree
  *  rooted at the node).
  *
- * Efficiency:
  *  BUILD_TREE:
  *      A post-order traversal is used to create a perfectly balanced tree with keys from the range 1...n. It's a divide and conquer
  *      algorithm. By applying the Master theorem for a = 2, b = 2, c = 0, we obtain O(n) running time. And the resulting binary
@@ -20,10 +19,25 @@
  *      The major improvement over QuickSelect is, that the latter performs the partitioning procedure in O(n) time, while OS_SELECT does
  *      only O(1) operations at each level. The partitioning is done by selecting the left or the right child of the current root. The tree
  *      is balanced so it splits the input data in two at each level. Thus by applying the Master theorem for a = 1, b = 2, c = 0, we obtain
- *      O( log n) running time.
+ *      O( log n) running time. If the tree is unbalanced, then the running time will be O(h).
  *
  *  OS_DELETE:
+ *      The OS_DELETE first searches the ith node by using OS_SELECT. The size of each visited node is decremented, to keep the OSTree property
+ *      after the deletion. The node returned by OS_SELECT is deleted using the standard BST deletion, with the exception, that if the node 
+ *      has two children, when we are searching for the inorder successor, the size of each node between the parent and the child is decremented.
+ *      These constant, O(1) operations doesn't change the asymptotic running time of these algorithms.
+ *      OS_SELECT is O(h) and BST deletion is also O(h). Thus the overall complexity is O(h). 
+ *      We created a perfectly balanced tree, thus the initial height is log n, and after each deletion, the height of the root is smaller than or
+ *      equal with the one before deletion. By deleting random nodes from the tree, the height of the tree will always be proportional with log n.
+ *      If an AVL or Red-Black tree is used, the O(log n) running time will be guaranteed for any input data.
  *
+ *  Chart interpretation:
+ *      The chart shows that if the nodes to be searched and deleted are randomly selected, even if the tree is not self balancing, the expected
+ *      average case running time of OS_SELECT and OS_DELETE is O(log n). These are called n times thus the overall complexity is O(n log n).
+ *      We can see the difference between these O(n log n) operations and the linear BUILD_TREE.
+ *      The curves of OS_SELECT and OS_DELETE are really close to each other, meaning that the deletion of the node (and searching for a successor)
+ *      doesn't have much impact on the overall performance.
+ *      We can also see the curve of the total operations (BUILD_TREE + OS_SELECT + OS_DELETE) which is O(n) + 2 * O(n log n) = O(n log n).
  */
 
 #include <iostream>
