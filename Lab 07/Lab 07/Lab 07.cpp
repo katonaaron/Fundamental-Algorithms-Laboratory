@@ -1,3 +1,41 @@
+/**
+ * @author Katona Aron
+ * @group 30423
+ *
+ * Problem specification:
+ *	    Implement correctly and efficiently linear time transformations between three different representations for a multi-way tree:
+ *          R1: parent representation: for each key you are given the parent key, in a vector.
+ *          R2: multi-way tree representation: for each node you have the key and a vector of children nodes
+ *          R3: binary tree representation: for each node, you have the key, and two pointers: one to the first child node, and one to
+ *          the brother on the right (i.e. the next brother node)
+ *
+ * Representation:
+ *      The nodes of the trees R2 (multi-way tree), R3 (binary tree) are represented as in the specification. Each tree has a pointer to the root.
+ *  
+ * Efficiency
+ *  Denote: n = number of elements in the input array
+ *  Parent representation -> Multi-way tree representation:
+ *      A vector of node pointers is used. It is filled with n new nodes having consecutive values between 1 and n. The input array is
+ *      iterated only once, and for each element of the parent vector the corresponding node is connected to its parent, except for -1
+ *      which will be the new root.
+ *      Thus the running time is T(n) = 2n * c = O(n).
+ *  Multi-way tree representation -> binary tree representation:
+ *      All the nodes of the multi-way tree are visited and copied to the binary tree, in a recursive approach. The algorithm is similar
+ *      to a pre-order traversal: 
+ *          A new node is created with the key of the current node of the multi-way tree. 
+ *          The right child of this node will be the sibling given by the parameter.
+ *          For each child of the current node of the multi-way tree, starting from the right one, this procedure is called recursively, 
+ *          and the previous child is given as sibling for the current child.
+ *          After all the child nodes are created, the left child of the current node will be the leftmost child.
+ *      Each node is visited only once. Thus the running time is O(n).        
+ *  
+ * Additional memory
+ *  Denote: n = number of elements in the input array
+ *  Parent representation -> Multi-way tree representation:
+ *      The nodes allocated in the algorithm are the nodes of the tree, so the only additional memory is the vector of pointers which is O(n) space.
+ *  Multi-way tree representation -> binary tree representation:
+ *      The additional space is the stack. It's a binary tree, thus the size of the stack is O(h). h is between 1 (no node has any siblings) and n (all the nodes are siblings).
+ */
 #include <iostream>
 #include <vector>
 
