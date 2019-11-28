@@ -6,6 +6,8 @@
 
 using namespace std;
 
+//#define DEMO
+
 template <class T>
 class DisjointSet
 {
@@ -94,11 +96,19 @@ void DemoKruskal()
     cout << "\n";
 }
 
-int main()
+void Evaluate()
 {
 
+}
+
+int main()
+{
+#ifdef DEMO
     DemoDisjointSet();
     DemoKruskal();
+#else
+    Evaluate();
+#endif // DEMO
     return 0;
 }
 
