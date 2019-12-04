@@ -1,3 +1,35 @@
+/**
+ * @author Katona Aron
+ * @group 30423
+ *
+ * Problem specification:
+ *  Implement correctly and efficiently the base operations for disjoint set and the Kruskal’s algorithm using disjoint sets.
+ *
+ * Disjoint set:
+ *  Structure: 
+ *      In order to map the generic keys to the nodes of the tree, a hash table is used, the unordered_map from STL. The
+ *      nodes and their keys are stored in the hash table. A node points to its key in the hash table, to another node from
+ *      the hash table, which is its parent, and has a rank field which is used to do union by rank.
+ *  Denote n as the number of MAKE_SET operation calls, i.e. the number of nodes in the forest.
+ *  MAKE_SET:
+ *      Insertion to the hash table is O(1) in the average case. The node is initialized in O(1). Thus the total complexity 
+ *      is O(1).
+ *  FIND_SET and UNION:
+ *      Due to the usage of path compression and union by rank, the height of each tree will become much smaller. The complexity
+ *      of these operations are O(alpha(n)), where alpha(n) is the inverse Ackerman function, which is a very slowly growing
+ *      function, having alpha(n) <= 4 for all practical purposes.
+ *  Efficiency:
+ *      It follows that for m number of MAKE_SET, FIND_SET, and UNION operations the running time is O(m * alpha(n)) which is
+ *      very close to O(m).
+ *  Additional space:
+ *      O(n) additional space is used to store each key and the corresponding node in the hash table.
+ *  Chart interpretation:    
+ *      In the Kruskal algorithm, the number of MAKE_SET, FIND_SET, and UNION operations is (V + 2*E). Thus the running time
+ *      of the disjoint set operations is O((V + E) * alpha(V)).
+ *      In the evaluation E is the function of V, E = V * 4. Thus the running time  of the disjoint set operations is 
+ *      O(V * alpha(V)).
+ *      From the chart we can deduce, that alpha(V) is truly a small number, and the curve of the operations are close linear.
+ */
 #include <iostream>
 #include <unordered_map>
 #include <unordered_set>
