@@ -39,16 +39,7 @@ class Graph {
         int x;
         int y;
         int weight;
-        bool operator < (const Edge& e) const
-        {
-            if (weight == e.weight)
-            {
-                if (x == e.x)
-                    return y < e.y;
-                return x < e.x;
-            }
-            return weight < e.weight;
-        }
+        bool operator < (const Edge& e) const { return weight < e.weight; }
     };
     unordered_set<int> V;
     vector<Edge> E;
