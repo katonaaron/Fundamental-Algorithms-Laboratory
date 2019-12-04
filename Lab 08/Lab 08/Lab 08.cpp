@@ -161,9 +161,14 @@ void Evaluate()
         cout << "\tKruskal\n";
         Graph mst = graph.MSTKruskal(opMake, opFind, opUnion);
     }
-    profiler.addSeries("FIND_UNION", "FIND_SET", "UNION");
-    profiler.addSeries("TOTAL", "FIND_UNION", "MAKE_SET");
+    profiler.addSeries("MAKE_UNION", "MAKE_SET", "UNION");
+    profiler.addSeries("TOTAL", "MAKE_UNION", "FIND_SET");
     profiler.createGroup("TOTAL", "MAKE_SET", "FIND_SET", "UNION", "TOTAL");
+
+    profiler.addSeries("HALF_FIND_SET", "FIND_SET", "FIND_SET");
+    profiler.divideValues("HALF_FIND_SET", 4);
+    profiler.addSeries("TOTAL_FOR_HALF_FIND_SET", "MAKE_UNION", "HALF_FIND_SET");
+    profiler.createGroup("TOTAL_FOR_HALF_FIND_SET", "MAKE_SET", "HALF_FIND_SET", "UNION", "TOTAL_FOR_HALF_FIND_SET");
 
     profiler.showReport();
 }
