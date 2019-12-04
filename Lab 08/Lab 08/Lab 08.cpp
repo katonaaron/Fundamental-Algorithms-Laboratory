@@ -14,8 +14,9 @@ template <class T>
 class DisjointSet
 {
     struct Node {
-        T parent;
+        const T* element;
         int rank;
+        Node* parent;
     };
 
     unordered_map<T, Node> objectsToNodes_;
@@ -29,7 +30,8 @@ public:
     //Demo
     void Dump();
 private:
-    void Link(const T& x, const T& y, Operation op);
+    void Link(Node& x, Node& y, Operation op);
+    Node& FindSet(Node& node, Operation op);
 };
 
 class Graph {
@@ -163,24 +165,29 @@ DisjointSet<T>::DisjointSet()
 template<class T>
 void DisjointSet<T>::MakeSet(const T& element, Operation op)
 {
-    objectsToNodes_.insert({ element, {element, 0} });
-    op.count(3);
+    objectsToNodes_.insert({ element, {nullptr, 0, nullptr} });
+
+    auto it = objectsToNodes_.find(element);
+    it->second.parent = &it->second;
+    it->second.element = &it->first;
+    op.count(5);
 }
 
 template<class T>
 const T& DisjointSet<T>::FindSet(const T& element, Operation op)
 {
     Node& node = objectsToNodes_.at(element);
-    op.count(2);
-    if (node.parent != element)
-        node.parent = FindSet(node.parent, op), op.count();
-    return node.parent;
+    op.count();
+    return *FindSet(node, op).element;
 }
 
 template<class T>
 void DisjointSet<T>::Union(const T& x, const T& y, Operation op)
 {
-    Link(FindSet(x, op), FindSet(y, op), op);
+    Node& nodeX = objectsToNodes_.at(x);
+    Node& nodeY = objectsToNodes_.at(y);
+    op.count(2);
+    Link(FindSet(nodeX, op), FindSet(nodeY, op), op);
 }
 
 template<class T>
@@ -194,7 +201,7 @@ void DisjointSet<T>::Dump()
     cout << "\nParent:\t";
     for (const pair<T, Node>& element : objectsToNodes_)
     {
-        cout << element.second.parent << "\t";
+        cout << *element.second.parent->element << "\t";
     }
     cout << "\nRank:\t";
     for (const pair<T, Node>& element : objectsToNodes_)
@@ -205,30 +212,38 @@ void DisjointSet<T>::Dump()
 }
 
 template<class T>
-void DisjointSet<T>::Link(const T& x, const T& y, Operation op)
+void DisjointSet<T>::Link(Node& x, Node& y, Operation op)
 {
     op.count();
-    if (x == y)
+    if (&x == &y)
         return;
-    Node& nodeX = objectsToNodes_.at(x);
-    Node& nodeY = objectsToNodes_.at(y);
-    op.count(3);
-    if (nodeX.rank < nodeY.rank)
+
+    op.count();
+    if (x.rank < y.rank)
     {
-        nodeX.parent = y;
+        x.parent = &y;
         op.count();
     }
     else
     {
-        nodeY.parent = x;
+        y.parent = &x;
         op.count(2);
-        if (nodeX.rank == nodeY.rank)
+        if (x.rank == y.rank)
         {
             op.count();
-            nodeX.rank++;
+            x.rank++;
         }
     }
 
+}
+
+template<class T>
+typename DisjointSet<T>::Node& DisjointSet<T>::FindSet(Node& node, Operation op)
+{
+    op.count();
+    if (node.parent != &node)
+        node.parent = &FindSet(*node.parent, op), op.count();
+    return *node.parent;
 }
 
 Graph::Graph()
