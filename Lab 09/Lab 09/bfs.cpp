@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <queue>
+#include <set>
 #include "bfs.h"
 #include "multiway_tree.h"
 
@@ -136,36 +137,49 @@ void bfs(Graph* graph, Node* s, Operation* op)
         graph->v[i]->color = COLOR_WHITE;
         graph->v[i]->dist = INT_MAX;
         graph->v[i]->parent = NULL;
+        if (op != NULL) op->count(3);
     }
 
     s->color = COLOR_GRAY;
     s->dist = 0;
     s->parent = NULL;
+    if (op != NULL) op->count(3);
+
 
     std::queue<Node*> q;
     q.push(s);
     Node* u;
     Node* v;
+    if (op != NULL) op->count(2);
+
 
     while (!q.empty())
     {
         u = q.front();
         q.pop();
+        if (op != NULL) op->count(3);
+
 
         for (int i = 0; i < u->adjSize; i++)
         {
             v = u->adj[i];
+            if (op != NULL) op->count(2);
+
             if (v->color == COLOR_WHITE)
             {
                 v->color = COLOR_GRAY;
                 v->dist = u->dist + 1;
                 v->parent = u;
                 q.push(v);
+                if (op != NULL) op->count(4);
+
             }
         }
 
         u->color = COLOR_BLACK;
+        if (op != NULL) op->count();
     }
+    if (op != NULL) op->count();
 }
 
 void print_bfs_tree(Graph* graph)
@@ -254,6 +268,43 @@ int shortest_path(Graph* graph, Node* start, Node* end, Node* path[])
     return -1;
 }
 
+void AddEdge(Graph* graph, int x, int y);
+
+ void GenerateEdges(Graph* graph, int v, int e)
+{
+    if (graph == NULL)
+        throw new std::invalid_argument("graph is NULL");
+    if (e < v - 1 || e > v* (v - 1) / 2)
+    {
+        throw new std::invalid_argument("no connected undirected simple graph can be made");
+    }
+
+    std::set<std::pair<int, int>> edges;
+    int x, y;
+
+    for (int y = 2; y <= v; y++)
+    {
+        x = (y == 2) ? 1 : rand() % (y - 2) + 1;
+        AddEdge(graph, x, y);
+        edges.insert({ x, y });
+        edges.insert({ y, x });
+    }
+
+    for (int i = v - 1; i < e; i++)
+    {
+        do {
+            x = rand() % (v - 1) + 1;
+            do
+            {
+                y = rand() % (v - 1) + 1;
+            } while (x == y);
+        } while (edges.count({ x, y }) != 0);
+
+        AddEdge(graph, x, y);
+        edges.insert({ x, y });
+        edges.insert({ y, x });
+    }
+}
 
 void performance()
 {
