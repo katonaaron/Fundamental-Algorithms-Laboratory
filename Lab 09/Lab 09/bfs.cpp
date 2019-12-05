@@ -2,15 +2,45 @@
 #include <string.h>
 #include "bfs.h"
 
+static inline bool isSafe(const Grid* grid, int col, int row)
+{
+    if (grid == NULL)
+        return false;
+
+    return col >= 0 && row >= 0 && col < grid->cols && row < grid->rows
+        && grid->mat[row][col] == 0;
+}
+
 int get_neighbors(const Grid* grid, Point p, Point neighb[])
 {
+    if (grid == NULL)
+        return 0;
+
+    const int dir[][2] = { {0, 1}, {0,-1}, {1, 0}, {-1, 0} };
+    const int dir_size = sizeof(dir) / sizeof(dir[0]);
+
+    int size = 0;
+    int row;
+    int col;
+
+    for (int i = 0; i < dir_size; i++)
+    {
+        col = p.col + dir[i][0];
+        row = p.row + dir[i][1];
+        if (isSafe(grid, col, row))
+        {
+            neighb[size].col = col;
+            neighb[size].row = row;
+            size++;
+        }
+    }
 
     // TODO: fill the array neighb with the neighbors of the point p and return the number of neighbors
     // the point p will have at most 4 neighbors (up, down, left, right)
     // avoid the neighbors that are outside the grid limits or fall into a wall
     // note: the size of the array neighb is guaranteed to be at least 4
 
-    return 0;
+    return size;
 }
 
 void grid_to_graph(const Grid* grid, Graph* graph)
