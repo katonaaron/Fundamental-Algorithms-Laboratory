@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
+#include <queue>
 #include "bfs.h"
+#include "multiway_tree.h"
 
 static inline bool isSafe(const Grid* grid, int col, int row)
 {
@@ -126,6 +128,44 @@ void bfs(Graph* graph, Node* s, Operation* op)
     // for counting the number of operations, the optional op parameter is received
     // since op can be NULL (when we are calling the bfs for display purposes), you should check it before counting:
     // if(op != NULL) op->count();
+
+    if (graph == NULL || s == NULL)
+        return;
+    for (int i = 0; i < graph->nrNodes; i++)
+    {
+        graph->v[i]->color = COLOR_WHITE;
+        graph->v[i]->dist = INT_MAX;
+        graph->v[i]->parent = NULL;
+    }
+
+    s->color = COLOR_GRAY;
+    s->dist = 0;
+    s->parent = NULL;
+
+    std::queue<Node*> q;
+    q.push(s);
+    Node* u;
+    Node* v;
+
+    while (!q.empty())
+    {
+        u = q.front();
+        q.pop();
+
+        for (int i = 0; i < u->adjSize; i++)
+        {
+            v = u->adj[i];
+            if (v->color == COLOR_WHITE)
+            {
+                v->color = COLOR_GRAY;
+                v->dist = u->dist + 1;
+                v->parent = u;
+                q.push(v);
+            }
+        }
+
+        u->color = COLOR_BLACK;
+    }
 }
 
 void print_bfs_tree(Graph* graph)
@@ -189,6 +229,9 @@ void print_bfs_tree(Graph* graph)
         // the parrent array is p (p[k] is the parent for node k or -1 if k is the root)
         // when printing the node k, print repr[k] (it contains the row and column for that point)
         // you can adapt the code for transforming and printing multi-way trees from the previous labs
+
+        MultiwayTree tree(p, n, repr);
+        tree.Print();
     }
 
     if (p != NULL) {

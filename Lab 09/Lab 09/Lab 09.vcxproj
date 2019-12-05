@@ -21,9 +21,11 @@
   <ItemGroup>
     <ClCompile Include="bfs.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="multiway_tree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bfs.h" />
+    <ClInclude Include="multiway_tree.h" />
     <ClInclude Include="Profiler.h" />
   </ItemGroup>
   <ItemGroup>
