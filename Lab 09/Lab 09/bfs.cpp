@@ -4,6 +4,7 @@
 #include <set>
 #include "bfs.h"
 #include "multiway_tree.h"
+#include <cassert>
 
 static inline bool isSafe(const Grid* grid, int col, int row)
 {
@@ -268,7 +269,18 @@ int shortest_path(Graph* graph, Node* start, Node* end, Node* path[])
     return -1;
 }
 
-void AddEdge(Graph* graph, int x, int y);
+void AddEdge(Graph* graph, int x, int y)
+{
+    if (graph == NULL || x < 0 || y < 0 || x >= graph->nrNodes || y >= graph->nrNodes)
+        throw new std::invalid_argument("Graph is null or the coordinates are out of range");
+
+    Node* nodeX = graph->v[x];
+    Node* nodeY = graph->v[y];
+    assert(nodeX != NULL && nodeY != NULL);
+
+    nodeX->adj[nodeX->adjSize++] = nodeY;
+    nodeY->adj[nodeY->adjSize++] = nodeX;
+}
 
  void GenerateEdges(Graph* graph, int v, int e)
 {
@@ -279,12 +291,19 @@ void AddEdge(Graph* graph, int x, int y);
         throw new std::invalid_argument("no connected undirected simple graph can be made");
     }
 
+    for (int i = 0; i < graph->nrNodes; i++)
+    {
+        graph->v[i]->adj = (Node**)malloc((graph->nrNodes - 1) * sizeof(Node*));
+        if (graph->v[i]->adj == NULL)
+            throw new std::bad_alloc;
+    }
+
     std::set<std::pair<int, int>> edges;
     int x, y;
 
-    for (int y = 2; y <= v; y++)
+    for (int y = 1; y < v; y++)
     {
-        x = (y == 2) ? 1 : rand() % (y - 2) + 1;
+        x = rand() % y;
         AddEdge(graph, x, y);
         edges.insert({ x, y });
         edges.insert({ y, x });
@@ -293,10 +312,10 @@ void AddEdge(Graph* graph, int x, int y);
     for (int i = v - 1; i < e; i++)
     {
         do {
-            x = rand() % (v - 1) + 1;
+            x = rand() % v;
             do
             {
-                y = rand() % (v - 1) + 1;
+                y = rand() % v;
             } while (x == y);
         } while (edges.count({ x, y }) != 0);
 
@@ -324,6 +343,7 @@ void performance()
         }
         // TODO: generate n random edges
         // make sure the generated graph is connected
+        GenerateEdges(&graph, graph.nrNodes, n);
 
         bfs(&graph, graph.v[0], &op);
         free_graph(&graph);
@@ -342,6 +362,7 @@ void performance()
         }
         // TODO: generate 4500 random edges
         // make sure the generated graph is connected
+        GenerateEdges(&graph, graph.nrNodes, 4500);
 
         bfs(&graph, graph.v[0], &op);
         free_graph(&graph);
