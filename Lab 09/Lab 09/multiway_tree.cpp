@@ -50,13 +50,13 @@ void MultiwayTree::Print()
 
 void MultiwayTree::Print(Node* node, int indent)
 {
-    std::cout << std::string(indent, ' ');
+    std::cout << std::string(indent, '\t');
     if (node != nullptr)
     {
-        std::cout << "(" << node->key.col << "," << node->key.row << ")" << "\n";
+        std::cout << "(" << node->key.row << "," << node->key.col << ")" << "\n";
         for (Node*& child : node->children)
         {
-            Print(child, indent + 4);
+            Print(child, indent + 1);
         }
     }
 }
