@@ -152,11 +152,11 @@ void bfs(Graph* graph, Node* s, Operation* op)
     Node* v;
     if (op != NULL) op->count(2);
 
-
+    if (op != NULL) op->count();
     while (!q.empty())
     {
         u = q.front();
-        if (op != NULL) op->count(3);
+        if (op != NULL) op->count();
 
 
         for (int i = 0; i < u->adjSize; i++)
@@ -177,9 +177,9 @@ void bfs(Graph* graph, Node* s, Operation* op)
 
         q.pop();
         u->color = COLOR_BLACK;
-        if (op != NULL) op->count();
+        if (op != NULL) op->count(3);
     }
-    if (op != NULL) op->count();
+    
 }
 
 void print_bfs_tree(Graph* graph)
