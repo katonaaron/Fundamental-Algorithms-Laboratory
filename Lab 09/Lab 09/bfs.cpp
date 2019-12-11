@@ -156,7 +156,6 @@ void bfs(Graph* graph, Node* s, Operation* op)
     while (!q.empty())
     {
         u = q.front();
-        q.pop();
         if (op != NULL) op->count(3);
 
 
@@ -176,6 +175,7 @@ void bfs(Graph* graph, Node* s, Operation* op)
             }
         }
 
+        q.pop();
         u->color = COLOR_BLACK;
         if (op != NULL) op->count();
     }
