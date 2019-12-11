@@ -1,0 +1,3 @@
+The Breadth First Search algorithm has the complexity of O(|V| + |E|), where V is the set of vertices and E is the set of edges.
+By varying the size of V and having a constant E, and by varying the size of E and having a constant V, we can see that the
+curve of the running time is linear in both cases.
