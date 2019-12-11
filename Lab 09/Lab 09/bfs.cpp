@@ -266,7 +266,22 @@ int shortest_path(Graph* graph, Node* start, Node* end, Node* path[])
     // the number of nodes filled in the path array should be returned
     // if end is not reachable from start, return -1
     // note: the size of the array path is guaranteed to be at least 1000
-    return -1;
+
+    if (graph == NULL || start == NULL || end == NULL)
+        throw new std::invalid_argument("The arguments must not be NULL");
+
+    bfs(graph, start, NULL);
+
+    if(end->color != COLOR_BLACK)
+        return -1;
+
+    Node* node = end;
+    for (int i = end->dist; i >= 0; i--)
+    {
+        path[i] = node;
+        node = node->parent;
+    }
+    return end->dist + 1;
 }
 
 void AddEdge(Graph* graph, int x, int y)
