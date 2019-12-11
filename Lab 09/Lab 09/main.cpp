@@ -13,7 +13,6 @@
 #include <string>
 
 #include "bfs.h"
-#include "knight.h"
 
 enum{
     COMMAND_EXIT,
@@ -23,11 +22,7 @@ enum{
     COMMAND_BFS_STEP,
     COMMAND_BFS_TREE,
     COMMAND_PATH,
-    COMMAND_PERF,
-    //knight
-    COMMAND_KNIGHT_BFS,
-    COMMAND_KNIGHT_BFS_STEP,
-    COMMAND_KNIGHT_BFS_TREE
+    COMMAND_PERF
 };
 
 typedef struct{
@@ -198,8 +193,7 @@ void readCommand(COMMAND *c, const Grid *grid)
             c->command = COMMAND_PERF;
             validCommand = 1;
         }else if(strcmp(token, "neighb") == 0 || strcmp(token, "neighbors") == 0 ||
-                strcmp(token, "bfs") == 0 || strcmp(token, "bfs_step") == 0 || strcmp(token, "bfs_tree") == 0 ||
-                strcmp(token, "knight_bfs") == 0 || strcmp(token, "knight_bfs_step") == 0 || strcmp(token, "knight_bfs_tree") == 0 ||
+                strcmp(token, "bfs") == 0 || strcmp(token, "bfs_step") == 0 || strcmp(token, "bfs_tree") == 0 || 
                 strcmp(token, "path") == 0){
             if(strcmp(token, "neighb") == 0 || strcmp(token, "neighbors") == 0){
                 c->command = COMMAND_NEIGHB;
@@ -207,14 +201,8 @@ void readCommand(COMMAND *c, const Grid *grid)
                 c->command = COMMAND_BFS;
             }else if(strcmp(token, "bfs_step") == 0){
                 c->command = COMMAND_BFS_STEP;
-            }else if (strcmp(token, "bfs_tree") == 0) {
+            }else if(strcmp(token, "bfs_tree") == 0){
                 c->command = COMMAND_BFS_TREE;
-            }else if(strcmp(token, "knight_bfs") == 0){
-                c->command = COMMAND_KNIGHT_BFS;
-            }else if(strcmp(token, "knight_bfs_step") == 0){
-                c->command = COMMAND_KNIGHT_BFS_STEP;
-            }else if(strcmp(token, "knight_bfs_tree") == 0){
-                c->command = COMMAND_KNIGHT_BFS_TREE;
             }else if(strcmp(token, "path") == 0){
                 c->command = COMMAND_PATH;
             }
@@ -282,7 +270,7 @@ int main()
     for(;;){
         displayGrid(&grid2, cmd.command);
         showErrors(errors);
-        if(cmd.command == COMMAND_BFS_TREE || cmd.command == COMMAND_KNIGHT_BFS_TREE){
+        if(cmd.command == COMMAND_BFS_TREE){
             print_bfs_tree(&graph);
         }
         readCommand(&cmd, &grid);
@@ -355,71 +343,6 @@ int main()
                         }
                     }
                 }else if(cmd.command == COMMAND_BFS_STEP){
-                    int newLayer = 1;
-                    int crtDist = 0;
-                    displayGrid(&grid2, cmd.command);
-                    while(newLayer){
-                        newLayer = 0;
-                        ++crtDist;
-                        for(i=0; i<graph.nrNodes; ++i){
-                            if(graph.v[i]->color == COLOR_BLACK && graph.v[i]->dist == crtDist){
-                                newLayer = 1;
-                                Point p1;
-                                p1 = graph.v[i]->position;
-                                grid2.mat[p1.row][p1.col] |= MASK_FILL;
-                            }
-                        }if(newLayer){
-                            sleep(1);
-                            displayGrid(&grid2, cmd.command);
-                        }
-                    }
-                }
-            }
-        }else if(cmd.command == COMMAND_KNIGHT_BFS || cmd.command == COMMAND_KNIGHT_BFS_STEP || cmd.command == COMMAND_KNIGHT_BFS_TREE){
-            grid2 = grid;
-            knight_grid_to_graph(&grid, &graph);
-            //find the starting node
-            int i;
-            Node *s = NULL;
-            for(i=0; i<graph.nrNodes; ++i){
-                if(graph.v[i]->position.row == cmd.p1.row && graph.v[i]->position.col == cmd.p1.col){
-                    s = graph.v[i];
-                    break;
-                }
-            }
-            if(s == NULL){
-                snprintf(err, 100, "Invalid starting position (%d, %d).", cmd.p1.row, cmd.p1.col);
-                errors.push_back(err);
-            }else{
-                bfs(&graph, s);
-                grid2.mat[cmd.p1.row][cmd.p1.col] |= MASK_START;
-                for(i=0; i<graph.nrNodes; ++i){
-                    if(graph.v[i]->color == COLOR_BLACK){
-                        Point p1, p2;
-                        p1 = graph.v[i]->position;
-                        if(graph.v[i]->parent != NULL){
-                            p2 = graph.v[i]->parent->position;
-                            if(p1.row < p2.row){
-                                grid2.mat[p1.row][p1.col] |= MASK_DOWN;
-                            }else if(p1.row > p2.row){
-                                grid2.mat[p1.row][p1.col] |= MASK_UP;
-                            }else if(p1.col > p2.col){
-                                grid2.mat[p1.row][p1.col] |= MASK_LEFT;
-                            }else if(p1.col < p2.col){
-                                grid2.mat[p1.row][p1.col] |= MASK_RIGHT;
-                            }
-                        }
-                    }
-                }
-                if(cmd.command == COMMAND_KNIGHT_BFS || cmd.command == COMMAND_KNIGHT_BFS_TREE){
-                    for(i=0; i<graph.nrNodes; ++i){
-                        if(graph.v[i]->color == COLOR_BLACK){
-                            Point p1;
-                            p1 = graph.v[i]->position;
-                            grid2.mat[p1.row][p1.col] |= MASK_FILL;
-                        }
-                    }
-                }else if(cmd.command == COMMAND_KNIGHT_BFS_STEP){
                     int newLayer = 1;
                     int crtDist = 0;
                     displayGrid(&grid2, cmd.command);
