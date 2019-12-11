@@ -6,6 +6,8 @@
 #include "multiway_tree.h"
 #include <cassert>
 
+#define KNIGHT false
+
 static inline bool isSafe(const Grid* grid, int col, int row)
 {
     if (grid == NULL)
@@ -19,8 +21,11 @@ int get_neighbors(const Grid* grid, Point p, Point neighb[])
 {
     if (grid == NULL)
         return 0;
-
+#if KNIGHT
+    const int dir[][2] = { {1, 2}, {1, -2}, {2, 1}, {2, -1}, {-1, 2}, {-1, -2}, {-2, 1}, {-2, -1} };
+#else
     const int dir[][2] = { {0, 1}, {0,-1}, {1, 0}, {-1, 0} };
+#endif // KNIGHT
     const int dir_size = sizeof(dir) / sizeof(dir[0]);
 
     int size = 0;
@@ -52,7 +57,11 @@ void grid_to_graph(const Grid* grid, Graph* graph)
     //we need to keep the nodes in a matrix, so we can easily refer to a position in the grid
     Node* nodes[MAX_ROWS][MAX_COLS];
     int i, j, k;
+#if KNIGHT
+    Point neighb[8];
+#else
     Point neighb[4];
+#endif // KNIGHT    
 
     //compute how many nodes we have and allocate each node
     graph->nrNodes = 0;
