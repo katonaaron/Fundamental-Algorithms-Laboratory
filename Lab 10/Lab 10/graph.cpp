@@ -15,42 +15,50 @@ void Graph::AddEdge(unsigned src, unsigned dest)
     adj[src].push_back(vertex[dest]);
 }
 
-void Graph::DFS()
+void Graph::DFS(Operation* op)
 {
+    if (op != nullptr) op->count();
     for (auto& v : vertex)
     {
         v->color = Color::WHITE;
         v->parent = nullptr;
+        if (op != nullptr) op->count(3);
     }
 
     time = 0;
+    if (op != nullptr) op->count();
 
     for (auto& v : vertex)
     {
+        if (op != nullptr) op->count();
         if (v->color == Color::WHITE)
         {
-            DFSVist(v->id);
+            DFSVist(v->id, op);
         }
     }
 }
 
-void Graph::DFSVist(unsigned src)
+void Graph::DFSVist(unsigned src, Operation* op)
 {
     std::shared_ptr<Vertex> u = vertex[src];
     u->d = ++time;
     u->color = Color::GRAY;
+    if (op != nullptr) op->count(4);
 
     for (auto& v : adj[src])
     {
+        if (op != nullptr) op->count();
         if (v->color == Color::WHITE)
         {
+            if (op != nullptr) op->count();
             v->parent = u;
-            DFSVist(v->id);
+            DFSVist(v->id, op);
         }
     }
 
     u->color = Color::BLACK;
     u->f = ++time;
+    if (op != nullptr) op->count(3);
 }
 
 std::list<unsigned> Graph::TopologicalSort()
@@ -135,11 +143,11 @@ void Graph::StronglyConnectedComponentsVisit(unsigned src, std::vector<std::vect
         {
             v->parent = u;
             StronglyConnectedComponentsVisit(v->id, result, stack);
-            u->low = std::min(u->low, v->low);
+            u->low = min(u->low, v->low);
         }
         else if (v->color == Color::GRAY)
         {
-            u->low = std::min(u->low, v->d);
+            u->low = min(u->low, v->d);
         }
     }
     

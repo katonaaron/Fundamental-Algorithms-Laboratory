@@ -1,9 +1,15 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <set>
+#include <time.h>
+
+#include "Profiler.h"
 #include "graph.h"
 
 using namespace std;
+
+#define DEMO true
 
 void DemoDFS()
 {
@@ -87,10 +93,77 @@ void StronglyConnectedComponentsDemo() {
     cout << "\n\n";
 }
 
+Graph GenerateGraph(int v, int e)
+{
+    Graph graph(v);
+
+    set<pair<int, int>> available_edges;
+
+    for (int i = 0; i < v; i++)
+    {
+        for (int j = 0; j < v; j++)
+        {
+            available_edges.emplace(i, j);
+        }
+    }
+
+    set<pair<int, int>>::iterator it;
+
+    for (int i = 0; i < e; i++)
+    {
+        it = available_edges.begin();
+        advance(it, rand() % available_edges.size());
+
+        graph.AddEdge(it->first, it->second);
+        available_edges.erase(*it);
+    }
+    return graph;
+}
+
+void Evaluate()
+{
+    const int v_fixed = 100;
+    const int e_min = 1000;
+    const int e_max = 5000;
+    const int e_steps = 100;
+
+    const int e_fixed = 9000;
+    const int v_min = 100;
+    const int v_max = 200;
+    const int v_steps = 10;
+
+    srand(time(0));
+    Profiler profiler("DFS");
+
+    for (int e = e_min; e <= e_max; e += e_steps)
+    {
+        cout << "Evaluation for v = " << v_fixed << ", e = " << e << "\n";
+        Operation op = profiler.createOperation("v_fixed", e);
+
+        Graph graph = GenerateGraph(v_fixed, e);
+        graph.DFS(&op);
+    }
+
+    for (int v = v_min; v <= v_max; v += v_steps)
+    {
+        cout << "Evaluation for v = " << v << ", e = " << e_fixed << "\n";
+        Operation op = profiler.createOperation("e_fixed", v);
+
+        Graph graph = GenerateGraph(v, e_fixed);
+        graph.DFS(&op);
+    }
+
+    profiler.showReport();
+}
+
 int main()
 {
+#if DEMO
     DemoDFS();
     TopologicalSortDemo();
     StronglyConnectedComponentsDemo();
+#else
+    Evaluate();
+#endif // DEMO
     return 0;
 }

@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <list>
 #include <stack>
-#include <algorithm>
+#include "Profiler.h"
 
 class Graph {
     enum class Color { WHITE, GRAY, BLACK };
@@ -27,8 +27,8 @@ class Graph {
 public:
     Graph(size_t v);
     void AddEdge(unsigned src, unsigned dest);
-    void DFS();
-    void DFSVist(unsigned src);
+    void DFS(Operation* op = nullptr);
+    void DFSVist(unsigned src, Operation* op = nullptr);
     std::list<unsigned> TopologicalSort();
     std::vector<std::vector<unsigned>> StronglyConnectedComponents();
 
