@@ -1,3 +1,22 @@
+/**
+ * @author Katona Aron
+ * @group 30423
+ *
+ *  Problem specification:
+ *     Implement correctly and efficiently the depth­first search algorithm (DFS). For graph representation, you should use adjacency lists
+­ *     Implement the Tarjan algorithm for detecting strongly connected components.
+­ *     Implement topological sorting.
+ *
+ *  Efficiency:
+ *      The initialization step of DFS is O(|V|).
+ *      When the nodes are visited, each edge is considered only once. Thus the complexity of the visit process is O(|E|).
+ *      Thus the total complexity is O(|V| + |E|).
+ *
+ *  Chart interpretation:
+ *      At first |V| was fixed and |E| was varying, then |E| was fixed an |V| was varying. In both cases the charts show a line. These linear running times show that
+ *      the complexity is indeed O(|V| + |E|).
+ */
+
 #include <iostream>
 #include <vector>
 #include <utility>
