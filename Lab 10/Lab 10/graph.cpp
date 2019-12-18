@@ -98,6 +98,66 @@ bool Graph::TopologicalSortVisit(unsigned src, std::list<unsigned>& result)
     return true;
 }
 
+std::vector<std::vector<unsigned>> Graph::StronglyConnectedComponents()
+{
+    std::vector<std::vector<unsigned>> result;
+    std::stack<std::shared_ptr<Vertex>> stack;
+
+    for (auto& v : vertex)
+    {
+        v->color = Color::WHITE;
+    }
+
+    time = 0;
+
+    for (auto& v : vertex)
+    {
+        if (v->color == Color::WHITE)
+        {
+            StronglyConnectedComponentsVisit(v->id, result, stack);
+        }
+    }
+
+    return result;
+}
+
+
+void Graph::StronglyConnectedComponentsVisit(unsigned src, std::vector<std::vector<unsigned>>& result, std::stack<std::shared_ptr<Vertex>>& stack)
+{
+    std::shared_ptr<Vertex> u = vertex[src];
+    u->d = u->low = ++time;
+    u->color = Color::GRAY;
+    stack.push(u);
+
+    for (auto& v : adj[src])
+    {
+        if (v->color == Color::WHITE)
+        {
+            v->parent = u;
+            StronglyConnectedComponentsVisit(v->id, result, stack);
+            u->low = std::min(u->low, v->low);
+        }
+        else if (v->color == Color::GRAY)
+        {
+            u->low = std::min(u->low, v->d);
+        }
+    }
+    
+    if (u->low == u->d)
+    {
+        result.emplace_back();
+        std::shared_ptr<Vertex> v = nullptr;
+
+        do
+        {
+            v = stack.top();
+            stack.pop();
+            v->color = Color::BLACK;
+            result.back().push_back(v->id);
+        } while (v->id != u->id);
+    }
+}
+
 void Graph::Dump()
 {
     std::cout << "id:";

@@ -6,6 +6,8 @@
 #include <memory>
 #include <stdexcept>
 #include <list>
+#include <stack>
+#include <algorithm>
 
 class Graph {
     enum class Color { WHITE, GRAY, BLACK };
@@ -17,8 +19,9 @@ class Graph {
         std::shared_ptr<Vertex> parent;
         size_t d;
         size_t f;
+        size_t low;
 
-        Vertex(int id) : id(id), color(Color::WHITE), d(0), f(0), parent(nullptr) {};
+        Vertex(int id) : id(id), color(Color::WHITE), d(0), f(0), low(0), parent(nullptr) {};
     };
 
 public:
@@ -27,6 +30,7 @@ public:
     void DFS();
     void DFSVist(unsigned src);
     std::list<unsigned> TopologicalSort();
+    std::vector<std::vector<unsigned>> StronglyConnectedComponents();
 
     //Demo
     void Dump();
@@ -38,6 +42,7 @@ private:
 
     const char* ColorToString(const Color color);
     bool TopologicalSortVisit(unsigned src, std::list<unsigned>& result);
+    void StronglyConnectedComponentsVisit(unsigned src, std::vector<std::vector<unsigned>>& result, std::stack<std::shared_ptr<Vertex>>& stack);
 };
 
 #endif // !GRAPH_H_INCLUDED
