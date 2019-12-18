@@ -63,8 +63,6 @@ std::list<unsigned> Graph::TopologicalSort()
         v->color = Color::WHITE;
     }
 
-    time = 0;
-
     for (auto& v : vertex)
     {
         if (v->color == Color::WHITE)
@@ -79,7 +77,6 @@ std::list<unsigned> Graph::TopologicalSort()
 bool Graph::TopologicalSortVisit(unsigned src, std::list<unsigned>& result)
 {
     std::shared_ptr<Vertex> u = vertex[src];
-    u->d = ++time;
     u->color = Color::GRAY;
 
     for (auto& v : adj[src])
@@ -96,7 +93,6 @@ bool Graph::TopologicalSortVisit(unsigned src, std::list<unsigned>& result)
     }
 
     u->color = Color::BLACK;
-    u->f = ++time;
     result.push_front(u->id);
 
     return true;
